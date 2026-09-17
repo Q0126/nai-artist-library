@@ -1,0 +1,4338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+
+<title>NAI画师资料库</title>
+
+
+<style>
+#infoBack{
+
+
+position:fixed;
+
+
+top:15px;
+
+
+left:15px;
+
+
+z-index:9999;
+
+
+
+background:#b98b67;
+
+
+color:white;
+
+
+border:none;
+
+
+border-radius:20px;
+
+
+padding:10px 18px;
+
+
+}
+
+#fixedBack{
+
+
+position:fixed;
+
+top:15px;
+
+left:15px;
+
+z-index:99;
+
+
+background:#b98b67;
+
+color:white;
+
+border-radius:20px;
+
+padding:10px 18px;
+
+
+}
+
+
+/* =========================
+基础
+========================= */
+
+
+*{
+
+box-sizing:border-box;
+
+}
+
+
+body{
+
+margin:0;
+
+font-family:
+"宋体",
+"SimSun",
+sans-serif;
+
+background:#f7f0e8;
+
+color:#4a3b32;
+
+}
+
+
+
+button{
+
+border:none;
+
+padding:8px 14px;
+
+border-radius:12px;
+
+background:#b98b67;
+
+color:white;
+
+cursor:pointer;
+
+margin:3px;
+
+}
+
+
+
+button:hover{
+
+opacity:.85;
+
+}
+
+
+
+.hidden{
+
+display:none!important;
+
+}
+
+
+
+
+/* =========================
+首页
+========================= */
+
+
+.page{
+
+min-height:100vh;
+
+padding:20px;
+
+}
+
+
+
+.title{
+
+text-align:center;
+
+font-size:28px;
+
+margin:30px;
+
+}
+
+
+
+
+.home-buttons{
+
+display:flex;
+
+flex-direction:column;
+
+gap:20px;
+
+align-items:center;
+
+}
+
+
+
+.big-button{
+
+width:80%;
+
+max-width:400px;
+
+font-size:22px;
+
+padding:25px;
+
+}
+
+
+
+/* =========================
+分类
+========================= */
+
+
+.category-list{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fill,minmax(140px,1fr));
+
+gap:15px;
+
+}
+
+
+
+.category-card{
+
+background:white;
+
+border-radius:20px;
+
+padding:18px;
+
+box-shadow:
+0 5px 15px #0002;
+
+}
+
+
+
+.category-name{
+
+font-size:18px;
+
+font-weight:bold;
+
+}
+
+
+
+/* =========================
+卡片墙
+========================= */
+
+.card-wall{
+
+display:grid;
+
+grid-template-columns:
+repeat(var(--cols),1fr);
+
+gap:15px;
+
+}
+
+
+
+.artist-card{
+
+background:white;
+
+border-radius:18px;
+
+overflow:hidden;
+
+box-shadow:
+0 5px 15px #0002;
+
+}
+
+
+
+.artist-card img{
+
+width:100%;
+
+aspect-ratio: 1 / 1.25;
+
+object-fit:cover;
+
+display:block;
+
+cursor:pointer;
+
+}
+
+
+
+
+.card-content{
+
+padding:12px;
+
+}
+
+
+
+.card-title{
+
+font-size:18px;
+
+font-weight:bold;
+
+margin-bottom:8px;
+
+}
+
+
+
+
+.prompt-box{
+
+
+background:#faf4ee;
+
+
+border-radius:12px;
+
+
+padding:10px;
+
+
+font-size:13px;
+
+
+
+max-height:260px;
+
+
+overflow-y:auto;
+
+
+overflow-x:hidden;
+
+
+
+word-break:break-word;
+
+
+white-space:pre-wrap;
+
+
+
+}
+
+
+.tag{
+
+display:inline-block;
+
+background:#ead7c5;
+
+padding:3px 8px;
+
+border-radius:10px;
+
+margin:2px;
+
+font-size:12px;
+
+}
+
+
+
+
+
+/* =========================
+弹窗
+========================= */
+
+
+.modal{
+
+position:fixed;
+
+left:0;
+
+top:0;
+
+width:100%;
+
+height:100%;
+
+background:#0008;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+z-index:10;
+
+}
+
+
+
+.modal-box{
+
+background:white;
+
+width:90%;
+
+max-width:500px;
+
+max-height:90vh;
+
+overflow:auto;
+
+border-radius:20px;
+
+padding:20px;
+
+}
+
+
+
+input,
+textarea{
+
+width:100%;
+
+padding:10px;
+
+border-radius:10px;
+
+border:1px solid #ddd;
+
+margin:5px 0;
+
+}
+
+
+
+textarea{
+
+height:120px;
+
+}
+
+
+
+/* =========================
+图片查看
+========================= */
+
+
+.viewer img{
+
+max-width:95vw;
+
+max-height:90vh;
+
+border-radius:15px;
+
+}
+
+
+
+
+
+/* 图片排列选择菜单 */
+.column-control{
+    position:relative;
+    display:inline-flex;
+}
+
+.column-menu{
+    position:absolute;
+    right:0;
+    top:calc(100% + 8px);
+    z-index:5000;
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+    width:150px;
+    padding:9px;
+    background:#fff;
+    border:1px solid #eaded3;
+    border-radius:14px;
+    box-shadow:0 8px 24px #0002;
+}
+
+.column-menu.hidden{
+    display:none;
+}
+
+.column-menu button{
+    flex:1 0 calc(33.333% - 7px);
+    min-width:40px;
+    padding:8px 6px;
+    border-radius:10px;
+}
+
+.column-menu button.active{
+    outline:2px solid #b98b67;
+}
+
+/* =========================
+收藏 / 回收站
+========================= */
+.favorite-btn{
+    float:right;
+    min-width:42px;
+    padding:6px 10px !important;
+    margin:0 0 6px 8px !important;
+    border-radius:12px !important;
+    font-size:18px;
+    line-height:1;
+}
+.favorite-btn.active{color:#b47745;}
+.utility-modal-list{
+    max-height:62vh;
+    overflow-y:auto;
+    display:grid;
+    gap:12px;
+    margin:12px 0;
+}
+.utility-empty{text-align:center;padding:35px 10px;opacity:.6;}
+.utility-card{
+    display:grid;
+    grid-template-columns:72px 1fr;
+    gap:12px;
+    align-items:center;
+    background:#faf6f1;
+    border-radius:14px;
+    padding:10px;
+}
+.utility-card img{width:72px;height:90px;object-fit:cover;border-radius:10px;}
+.utility-card-title{font-weight:bold;margin-bottom:4px;}
+.utility-card-meta{font-size:12px;opacity:.6;margin-bottom:7px;}
+.utility-card button{margin:3px 5px 0 0;padding:6px 10px;font-size:13px;}
+
+/* =========================
+顶部栏
+========================= */
+
+
+.topbar{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-bottom:15px;
+
+}
+
+:root{
+
+--cols:3;
+
+}
+
+/* 修复长Prompt横向溢出 */
+
+#infoContent{
+
+width:100%;
+
+max-width:100%;
+
+max-height:60vh;
+
+overflow-y:auto;
+
+overflow-x:hidden;
+
+word-break:break-all;
+
+overflow-wrap:anywhere;
+
+white-space:pre-wrap;
+
+line-height:1.4;
+
+box-sizing:border-box;
+
+}
+
+
+
+#infoContent .prompt-box{
+
+width:100%;
+
+max-width:100%;
+
+box-sizing:border-box;
+
+overflow-x:hidden;
+
+word-break:break-all;
+
+overflow-wrap:anywhere;
+
+}
+
+
+
+.prompt-box{
+
+width:100%;
+
+max-width:100%;
+
+box-sizing:border-box;
+
+overflow-x:hidden;
+
+word-break:break-all;
+
+overflow-wrap:anywhere;
+
+white-space:pre-wrap;
+
+}
+
+#searchResult{
+
+display:grid;
+
+grid-template-columns:repeat(
+var(--cols),
+1fr
+);
+
+gap:10px;
+
+}
+
+
+
+.search-img{
+
+width:100%;
+
+aspect-ratio:2/3;
+
+object-fit:cover;
+
+border-radius:10px;
+
+cursor:pointer;
+
+}
+
+/* 压缩详情页提示词间距 */
+#infoContent{
+    line-height:1.35;
+}
+
+#infoContent .prompt-box{
+    margin:0 0 8px 0;
+    padding:10px;
+    line-height:1.35;
+}
+
+#infoContent b{
+    display:inline;
+}
+
+#infoContent br{
+    line-height:1;
+}
+
+#infoContent hr{
+    margin:8px 0;
+}
+
+#infoContent button{
+    margin-top:6px;
+}
+
+.author{
+
+font-size:14px;
+
+font-weight:normal;
+
+margin-top:8px;
+
+opacity:.7;
+
+letter-spacing:2px;
+
+}
+
+.thanks{
+
+text-align:center;
+
+margin-top:40px;
+
+font-size:14px;
+
+opacity:.65;
+
+letter-spacing:1px;
+
+}
+
+/* 长按排序 */
+.sorting{
+    opacity:.65;
+    transform:scale(.98);
+    box-shadow:0 8px 20px #0003;
+}
+
+.sort-placeholder{
+    border:2px dashed #b98b67;
+    border-radius:18px;
+    min-height:80px;
+    opacity:.4;
+}
+
+.category-card,
+.artist-card{
+    user-select:none;
+    -webkit-user-select:none;
+    -webkit-touch-callout:none;
+}
+
+
+/* =========================
+   简约首页 v6
+   ========================= */
+
+/* 搜索窗口：结果区域独立滚动，关闭按钮始终固定在窗口底部 */
+#searchModal .modal-box{
+    height:90vh;
+    max-height:90vh;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    box-sizing:border-box;
+    position:relative;
+}
+#searchModal .modal-box h3{
+    flex:0 0 auto;
+    margin-top:0;
+}
+#searchModal #searchInput{
+    flex:0 0 auto;
+}
+#searchModal #searchResult{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    overflow-x:hidden;
+    align-content:start;
+    padding:8px 2px 12px;
+    -webkit-overflow-scrolling:touch;
+}
+#searchModal .search-close{
+    flex:0 0 auto;
+    width:100%;
+    margin:10px 0 0;
+    padding:12px;
+    border-radius:14px;
+    background:#b98b67;
+    color:#fff;
+    border:0;
+    box-shadow:none;
+}
+
+#homePage{
+    padding:34px 22px 28px;
+    max-width:760px;
+    margin:0 auto;
+}
+#homePage .title{
+    margin:18px 0 34px;
+    font-size:31px;
+    font-weight:500;
+    letter-spacing:2px;
+    color:#4b3c34;
+    text-align:center;
+}
+#homePage .title-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+}
+#homePage .title-main{
+    display:inline-flex;
+    align-items:center;
+}
+#homePage .update-log-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:27px;
+    height:27px;
+    padding:0;
+    margin:0;
+    border-radius:50%;
+    background:transparent;
+    color:#9a806d;
+    border:1px solid rgba(185,139,103,.42);
+    font-size:12px;
+    line-height:1;
+    box-shadow:none;
+    cursor:pointer;
+}
+#homePage .update-log-btn:hover{
+    background:rgba(185,139,103,.10);
+    opacity:1;
+}
+#homePage .author{
+    margin-top:10px;
+    font-size:13px;
+    letter-spacing:4px;
+    color:#8d7c70;
+}
+#homePage .home-buttons{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    align-items:stretch;
+    margin:0 auto 28px;
+    max-width:560px;
+}
+#homePage .home-buttons .big-button{
+    width:auto;
+    max-width:none;
+    min-height:82px;
+    padding:18px 12px;
+    margin:0;
+    border-radius:20px;
+    background:#b98b67;
+    box-shadow:none;
+    font-size:19px;
+    font-weight:500;
+    letter-spacing:1px;
+}
+/* 导入 / 导出成组 */
+#homePage .data-actions{
+    grid-column:1 / -1;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+#homePage .data-actions button{
+    min-height:50px;
+    margin:0;
+    padding:11px 8px;
+    border-radius:15px;
+    background:rgba(185,139,103,.13);
+    color:#6d584b;
+    border:1px solid rgba(185,139,103,.28);
+    font-size:14px;
+    box-shadow:none;
+}
+#homePage .data-actions button:hover{
+    background:rgba(185,139,103,.2);
+    opacity:1;
+}
+
+#homePage .home-buttons > button:not(.big-button){
+    min-height:50px;
+    margin:0;
+    padding:11px 8px;
+    border-radius:15px;
+    background:rgba(185,139,103,.13);
+    color:#6d584b;
+    border:1px solid rgba(185,139,103,.28);
+    font-size:14px;
+    box-shadow:none;
+}
+#homePage .home-buttons > button:not(.big-button):hover{
+    background:rgba(185,139,103,.2);
+    opacity:1;
+}
+#homePage .home-buttons > button[onclick="openSearch()"]{
+    grid-column:1 / -1;
+    width:100%;
+}
+#homePage .home-buttons #backupInput{display:none;}
+#homePage .home-buttons::after{display:none;}
+#homePage > div:nth-of-type(2){
+    margin-top:8px;
+    padding-top:20px;
+    border-top:1px solid rgba(185,139,103,.22);
+}
+#homePage > div:nth-of-type(2) h3{
+    margin:0 0 14px 2px;
+    font-size:17px;
+    font-weight:500;
+    color:#6d584b;
+    letter-spacing:1px;
+}
+#homePage #recentList{
+    --cols:2;
+    gap:10px;
+}
+#homePage .thanks{
+    margin-top:30px;
+    font-size:12px;
+    color:#9a887b;
+}
+@media (max-width:430px){
+    #homePage{padding:24px 16px 22px;}
+    #homePage .title{font-size:27px;margin:12px 0 28px;}
+    #homePage .home-buttons .big-button{min-height:76px;font-size:18px;}
+    #homePage .home-buttons{gap:10px;}
+}
+
+</style>
+
+<style id="search-fix-v11">
+/* v11 搜索：固定为真正的两列独立卡片，禁止内容互相挤压 */
+#searchModal .modal-box{
+    width:min(92vw,560px);
+    height:min(78vh,720px);
+    max-height:min(78vh,720px);
+    padding:18px 16px 14px;
+    border-radius:24px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    box-sizing:border-box;
+}
+#searchModal .modal-box h3{
+    flex:0 0 auto;
+    margin:0 0 8px;
+    font-size:22px;
+}
+#searchModal #searchInput{
+    flex:0 0 auto;
+    box-sizing:border-box;
+    width:100%;
+    height:48px;
+    margin:0 0 10px;
+}
+#searchModal #searchResult{
+    flex:1 1 auto;
+    min-height:0;
+    width:100%;
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    grid-auto-rows:max-content !important;
+    align-items:start !important;
+    align-content:start !important;
+    gap:12px !important;
+    padding:2px 3px 12px !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+    box-sizing:border-box;
+}
+#searchModal .search-result-card{
+    display:block !important;
+    width:100% !important;
+    min-width:0 !important;
+    height:auto !important;
+    min-height:0 !important;
+    margin:0 !important;
+    padding:0 !important;
+    position:relative !important;
+    overflow:hidden !important;
+    box-sizing:border-box !important;
+    background:#fff !important;
+    border:1px solid rgba(185,139,103,.12) !important;
+    border-radius:16px !important;
+    box-shadow:0 3px 10px rgba(75,60,52,.08) !important;
+}
+#searchModal .search-thumb{
+    display:block !important;
+    width:100% !important;
+    height:150px !important;
+    overflow:hidden !important;
+    background:#f5eee8 !important;
+}
+#searchModal .search-img{
+    display:block !important;
+    width:100% !important;
+    height:150px !important;
+    max-width:none !important;
+    max-height:none !important;
+    aspect-ratio:auto !important;
+    object-fit:cover !important;
+    border:0 !important;
+    border-radius:0 !important;
+    margin:0 !important;
+    padding:0 !important;
+}
+#searchModal .search-no-img{
+    display:flex !important;
+    align-items:center;
+    justify-content:center;
+    color:#a18f83;
+    font-size:12px;
+}
+#searchModal .search-name{
+    display:block !important;
+    width:100% !important;
+    height:36px !important;
+    line-height:36px !important;
+    padding:0 10px !important;
+    box-sizing:border-box !important;
+    color:#4b3c34 !important;
+    font-size:13px !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    background:#fff !important;
+}
+#searchModal .search-close{
+    flex:0 0 auto;
+    width:100%;
+    height:46px;
+    margin:4px 0 0;
+    border-radius:14px;
+}
+@media(max-width:420px){
+    #searchModal .modal-box{width:92vw;height:76vh;max-height:76vh;padding:16px 12px 12px;}
+    #searchModal #searchResult{gap:10px !important;padding-left:2px !important;padding-right:2px !important;}
+    #searchModal .search-thumb,#searchModal .search-img{height:125px !important;}
+}
+</style>
+</head>
+
+
+
+<body>
+
+
+<!-- =========================
+首页
+========================= -->
+
+
+<div id="homePage" class="page">
+
+
+<div class="title">
+    <div class="title-row">
+        <span class="title-main">🎨 NAI画师资料库</span>
+        <button class="update-log-btn" onclick="openUpdateLog()" title="更新日志" aria-label="更新日志">i</button>
+    </div>
+    <div class="author">by 白水</div>
+</div>
+
+
+
+<div class="home-buttons">
+
+
+<button class="big-button"
+onclick="openLibrary('artistThread')">
+🎨 画师串
+</button>
+
+<button class="big-button"
+onclick="openLibrary('singleArtist')">
+🖌 单画师
+</button>
+
+
+<button onclick="openSearch()">🔍 搜索</button>
+
+
+<div class="data-actions">
+
+<button onclick="exportData()">📦 导出备份</button>
+
+<button onclick="importBackup()">📥 导入备份</button>
+
+</div>
+
+<button onclick="openFavorites()">⭐ 收藏</button>
+
+<button onclick="openRecycleBin()">🗑 回收站</button>
+
+<input 
+id="backupInput"
+type="file"
+accept=".json"
+style="display:none"
+>
+
+
+</div>
+
+
+
+<div>
+
+<h3>
+最近添加
+</h3>
+
+
+<div id="recentList"
+class="card-wall">
+
+</div>
+
+
+</div>
+
+<div class="thanks">
+
+感谢您的使用₍^˶ ╸𖥦  ╸˵^₎⟆
+
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- =========================
+库页面
+========================= -->
+
+
+<div id="libraryPage"
+class="page hidden">
+
+
+<div class="topbar">
+
+
+<button onclick="backHome()">
+
+返回
+
+</button>
+
+
+<h2 id="libraryTitle">
+
+</h2>
+
+
+<button onclick="createCategory()">
+
+＋分类
+
+</button>
+
+
+</div>
+
+
+
+<div id="categoryList"
+class="category-list">
+
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- =========================
+分类内容
+========================= -->
+
+
+<div id="categoryPage" class="page hidden">
+
+
+
+
+<div class="topbar">
+
+
+<button onclick="backCategory()">
+
+返回
+
+</button>
+
+
+<h2 id="categoryTitle">
+
+</h2>
+
+
+<button onclick="openImport()">
+
+＋导入PNG
+
+</button>
+
+<div class="column-control">
+
+<button onclick="toggleColumnMenu()" id="columnButton">
+
+☷ 排列
+
+</button>
+
+<div id="columnMenu" class="column-menu hidden">
+
+<button onclick="setColumnsChoice(2)">2个</button>
+<button onclick="setColumnsChoice(3)">3个</button>
+<button onclick="setColumnsChoice(4)">4个</button>
+<button onclick="setColumnsChoice(5)">5个</button>
+<button onclick="setColumnsChoice(6)">6个</button>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+
+
+<div id="cardWall"
+class="card-wall">
+
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- =========================
+收藏窗口
+========================= -->
+<div id="favoriteModal" class="modal hidden">
+<div class="modal-box">
+<h3>⭐ 我的收藏</h3>
+<div id="favoriteList" class="utility-modal-list"></div>
+<button onclick="closeFavorites()">关闭</button>
+</div>
+</div>
+
+<!-- =========================
+回收站窗口
+========================= -->
+<div id="recycleModal" class="modal hidden">
+<div class="modal-box">
+<h3>🗑 回收站</h3>
+<div id="recycleList" class="utility-modal-list"></div>
+<div style="text-align:center;margin-top:8px;">
+<button onclick="emptyRecycleBin()">清空回收站</button>
+<button onclick="closeRecycleBin()">关闭</button>
+</div>
+</div>
+</div>
+
+<!-- =========================
+导入窗口
+========================= -->
+
+
+<div id="importModal"
+class="modal hidden">
+
+
+<div class="modal-box">
+
+
+<h3>
+
+批量导入PNG
+
+</h3>
+
+
+<input
+id="pngInput"
+type="file"
+multiple
+accept="image/png">
+
+
+
+<div id="importProgress">
+
+</div>
+
+
+
+<button onclick="closeImport()">
+
+关闭
+
+</button>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+<!-- =========================
+编辑窗口
+========================= -->
+
+
+<div id="editModal"
+class="modal hidden">
+
+
+<div class="modal-box">
+
+
+<h3>
+编辑资料
+</h3>
+
+
+
+<input id="artistName"
+placeholder="名称">
+
+
+
+<input id="editTags"
+placeholder="标签">
+
+
+
+<textarea id="editPositive"
+placeholder="正向Prompt">
+</textarea>
+
+
+
+<textarea id="editNegative"
+placeholder="负向Prompt">
+</textarea>
+
+
+
+<textarea id="editParameter"
+placeholder="参数">
+</textarea>
+
+
+
+<textarea id="editNote"
+placeholder="备注">
+</textarea>
+
+
+
+<button onclick="saveEdit()">
+
+保存
+
+</button>
+
+
+<button onclick="closeEdit()">
+
+取消
+
+</button>
+
+
+
+</div>
+
+</div>
+
+
+
+
+
+<!-- =========================
+图片查看
+========================= -->
+
+
+<div id="imageViewer"
+class="modal hidden viewer"
+onclick="closeImage()">
+
+
+
+<img id="bigImage">
+
+
+</div>
+
+
+
+
+
+<!-- =========================
+搜索
+========================= -->
+
+<div id="infoModal" class="modal hidden">
+
+
+<button 
+id="infoBack"
+onclick="closeInfo()">
+
+← 返回
+
+</button>
+
+
+<div class="modal-box">
+
+
+<h3 id="infoTitle">
+
+</h3>
+
+
+<div id="infoContent">
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+<div id="searchModal"
+class="modal hidden">
+
+
+<div class="modal-box">
+
+
+<h3>
+搜索
+</h3>
+
+
+<input id="searchInput"
+placeholder="搜索Prompt/画师">
+
+
+<div id="searchResult">
+
+</div>
+
+
+
+<button class="search-close" onclick="closeSearch()">
+
+关闭搜索
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- 更新日志 -->
+<div id="updateLogModal" class="modal hidden">
+    <div class="modal-box update-log-box">
+        <div class="update-log-head">
+            <div>
+                <div class="update-log-title">更新日志</div>
+                <div class="update-log-version">2026.09.18 · 今日更新</div>
+            </div>
+            <button class="update-log-x" onclick="closeUpdateLog()" aria-label="关闭">×</button>
+        </div>
+        <div class="update-log-content">
+            <div class="update-item"><span>01</span><div><b>拖拽排序优化</b><p>修复长按排序时前后卡片一起消失的问题，拖动更稳定。</p></div></div>
+            <div class="update-item"><span>02</span><div><b>收藏 & 回收站</b><p>新增收藏资料与回收站，删除后的资料可以恢复。</p></div></div>
+            <div class="update-item"><span>03</span><div><b>首页简约化</b><p>重新整理首页布局，让常用功能更紧凑。</p></div></div>
+            <div class="update-item"><span>04</span><div><b>排列方式</b><p>新增每行 2～6 个卡片的排列选择，并记住上次设置。</p></div></div>
+            <div class="update-item"><span>05</span><div><b>搜索体验</b><p>搜索结果独立滚动，关闭按钮固定在底部。</p></div></div>
+            <div class="update-item"><span>06</span><div><b>备份整理</b><p>导入备份与导出备份放到同一区域，使用更直观。</p></div></div>
+            <div class="update-item"><span>07</span><div><b>搜索结果重做</b><p>修复搜索图片互相挤压、重叠的问题，改为独立卡片显示。</p></div></div>
+            <div class="update-item"><span>08</span><div><b>搜索点击直达</b><p>搜索结果可直接点击进入对应图片的提示词详情。</p></div></div>
+            <div class="update-item"><span>09</span><div><b>提示词详情优化</b><p>详情页调整为图片在上、正面与负面提示词在下，并压缩多余空白。</p></div></div>
+            <div class="update-item"><span>10</span><div><b>搜索打开即显示</b><p>打开搜索时会直接显示全部资料，不需要先输入再清空搜索框。</p></div></div>
+        </div>
+        <button class="update-log-close" onclick="closeUpdateLog()">知道啦</button>
+    </div>
+</div>
+
+<style>
+.update-log-box{max-width:460px;max-height:82vh;padding:22px;box-sizing:border-box;}
+.update-log-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-bottom:14px;border-bottom:1px solid rgba(185,139,103,.18);}
+.update-log-title{font-size:21px;color:#4b3c34;letter-spacing:2px;}
+.update-log-version{margin-top:5px;font-size:11px;color:#a18f83;letter-spacing:1px;}
+.update-log-x{width:32px;height:32px;padding:0;margin:0;border:0;border-radius:50%;background:rgba(185,139,103,.10);color:#806b5d;font-size:22px;line-height:1;box-shadow:none;}
+.update-log-content{margin-top:8px;max-height:58vh;overflow-y:auto;padding-right:3px;}
+.update-item{display:flex;gap:12px;padding:14px 2px;border-bottom:1px solid rgba(185,139,103,.12);}
+.update-item > span{flex:0 0 24px;width:24px;height:24px;border-radius:50%;background:rgba(185,139,103,.13);color:#9a806d;font-size:10px;display:flex;align-items:center;justify-content:center;}
+.update-item b{color:#5b493f;font-size:14px;font-weight:600;}
+.update-item p{margin:4px 0 0;color:#8d7b70;font-size:12px;line-height:1.65;}
+.update-log-close{width:100%;margin:14px 0 0;min-height:44px;border-radius:13px;background:#b98b67;color:white;border:0;box-shadow:none;font-size:14px;}
+
+/* v9：搜索结果使用独立卡片，避免图片被挤成横条 */
+#searchResult{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+    align-items:start;
+}
+#searchModal #searchResult{
+    align-content:start;
+}
+.search-result-card{
+    background:#fff;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 3px 12px rgba(75,60,52,.08);
+    cursor:pointer;
+    min-width:0;
+    border:1px solid rgba(185,139,103,.08);
+}
+.search-result-card .search-img{
+    display:block;
+    width:100%;
+    height:170px;
+    aspect-ratio:auto;
+    object-fit:cover;
+    border-radius:0;
+    background:#f5eee8;
+}
+@media(max-width:420px){
+    .search-result-card .search-img{height:145px;}
+}
+.search-result-card .search-name{
+    padding:9px 10px 11px;
+    font-size:14px;
+    line-height:1.35;
+    color:#4b3c34;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+/* v10：提示词详情顶部图片 */
+.info-main-image-wrap{
+    width:100%;
+    margin:0 0 16px;
+    border-radius:16px;
+    overflow:hidden;
+    background:#f5eee8;
+    box-shadow:0 3px 12px rgba(75,60,52,.07);
+}
+.info-main-image{
+    display:block;
+    width:100%;
+    max-height:330px;
+    object-fit:contain;
+    background:#f5eee8;
+}
+.info-no-image{
+    min-height:120px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#a18f83;
+    font-size:13px;
+}
+.info-section{
+    margin:0 0 14px;
+}
+.info-section + .info-section{
+    padding-top:14px;
+    border-top:1px solid #eaded3;
+}
+.info-meta{
+    padding-top:12px;
+    border-top:1px solid #eaded3;
+    display:grid;
+    gap:7px;
+    color:#6f5d53;
+    font-size:14px;
+}
+/* v9：详情页提示词紧凑显示 */
+#infoContent{
+    white-space:normal;
+    line-height:1.4;
+}
+#infoContent .info-label{
+    display:block;
+    margin:0 0 6px;
+}
+#infoContent .info-prompt{
+    display:block;
+    margin:0 0 7px;
+    padding:10px 11px;
+    background:#faf4ee;
+    border-radius:12px;
+    white-space:pre-wrap;
+    word-break:break-word;
+    overflow-wrap:anywhere;
+    line-height:1.4;
+}
+#infoContent .info-copy{
+    margin:0 0 10px;
+}
+#infoContent hr{
+    margin:10px 0;
+    border:0;
+    border-top:1px solid #eaded3;
+}
+</style>
+
+<script>
+
+// =================================
+// NAI资料库 v4.2
+// JS Part 1
+// 基础系统 + 分类 + 图片数据库
+// =================================
+
+
+const $ = id => document.getElementById(id);
+
+
+
+let DB =
+JSON.parse(
+localStorage.getItem("NAI_DB_V42")
+||
+"null"
+)
+||
+{
+
+artistThread:{
+"默认分类":[]
+},
+
+singleArtist:{
+"默认分类":[]
+},
+
+recycleBin:[]
+
+};
+
+
+
+let currentLibrary="";
+let currentCategory="";
+let editIndex=-1;
+
+let imageDB=null;
+
+
+
+
+
+function saveDB(){
+
+localStorage.setItem(
+"NAI_DB_V42",
+JSON.stringify(DB)
+);
+
+}
+
+
+
+
+
+
+// ===============================
+// IndexedDB
+// ===============================
+
+
+function initImageDB(){
+
+
+return new Promise(resolve=>{
+
+
+let request =
+indexedDB.open(
+"NAI_IMAGE_V42",
+1
+);
+
+
+
+request.onupgradeneeded=e=>{
+
+
+let db=e.target.result;
+
+
+if(
+!db.objectStoreNames.contains("img")
+){
+
+
+db.createObjectStore(
+"img",
+{
+keyPath:"id"
+}
+);
+
+
+}
+
+
+};
+
+
+
+request.onsuccess=e=>{
+
+
+imageDB=e.target.result;
+
+resolve();
+
+
+};
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+function saveImage(file){
+
+
+return new Promise(resolve=>{
+
+
+let reader=
+new FileReader();
+
+
+
+reader.onload=e=>{
+
+
+let id=
+"img_"
++
+Date.now()
++
+Math.random();
+
+
+
+let tx=
+imageDB.transaction(
+"img",
+"readwrite"
+);
+
+
+
+tx.objectStore("img")
+.put({
+
+id:id,
+
+data:e.target.result
+
+});
+
+
+
+resolve(id);
+
+
+
+};
+
+
+
+reader.readAsDataURL(file);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+function getImage(id){
+
+
+return new Promise(resolve=>{
+
+
+let tx=
+imageDB.transaction(
+"img",
+"readonly"
+);
+
+
+
+let req=
+tx.objectStore("img")
+.get(id);
+
+
+
+req.onsuccess=()=>{
+
+
+resolve(
+req.result?
+req.result.data:
+""
+);
+
+
+
+};
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+// ===============================
+// 页面
+// ===============================
+
+
+function openLibrary(type){
+
+
+
+currentLibrary=type;
+
+
+
+$("homePage")
+.classList.add("hidden");
+
+
+
+$("libraryPage")
+.classList.remove("hidden");
+
+
+
+$("libraryTitle")
+.innerHTML=
+
+type==="artistThread"
+?
+"🎨 画师串"
+:
+"🖌 单画师";
+
+
+
+renderCategories();
+
+
+
+}
+
+
+
+function backHome(){
+
+
+$("libraryPage")
+.classList.add("hidden");
+
+
+$("categoryPage")
+.classList.add("hidden");
+
+
+$("homePage")
+.classList.remove("hidden");
+
+
+
+}
+
+
+
+
+
+function backCategory(){
+
+
+
+$("categoryPage")
+.classList.add("hidden");
+
+
+
+$("libraryPage")
+.classList.remove("hidden");
+
+
+
+renderCategories();
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// 分类
+// ===============================
+
+
+function renderCategories(){
+
+    let box=$("categoryList");
+
+    box.innerHTML="";
+
+    Object.keys(
+        DB[currentLibrary]
+    )
+    .forEach(name=>{
+
+        let div=
+        document.createElement("div");
+
+        div.className=
+        "category-card";
+
+        div.innerHTML=
+        `
+        <div class="category-name">
+        📁 ${name}
+        </div>
+
+        <p>
+        ${DB[currentLibrary][name].length}
+        张
+        </p>
+
+        <button class="rename">
+        改名
+        </button>
+
+        <button class="del">
+        删除
+        </button>
+        `;
+
+
+        /* =========================
+           普通点击
+        ========================= */
+
+        div.onclick=e=>{
+
+            if(
+                e.target.className!=="del" &&
+                e.target.className!=="rename"
+            ){
+                openCategory(name);
+            }
+
+        };
+
+
+        /* =========================
+           改名
+        ========================= */
+
+        div.querySelector(".rename")
+        .onclick=e=>{
+
+            e.stopPropagation();
+
+            let newName=prompt(
+                "请输入新的文件夹名称",
+                name
+            );
+
+            if(!newName)
+            return;
+
+            newName=newName.trim();
+
+            if(!newName || newName===name)
+            return;
+
+            if(DB[currentLibrary][newName]){
+
+                alert(
+                    "这个文件夹名称已经存在"
+                );
+
+                return;
+
+            }
+
+            DB[currentLibrary][newName]=
+            DB[currentLibrary][name];
+
+            delete DB[currentLibrary][name];
+
+            if(currentCategory===name){
+
+                currentCategory=newName;
+
+            }
+
+            saveDB();
+
+            renderCategories();
+
+        };
+
+
+        /* =========================
+           删除
+        ========================= */
+
+        div.querySelector(".del")
+        .onclick=e=>{
+
+            e.stopPropagation();
+
+            let result =
+            confirm(
+                "确定要删除「"
+                +
+                name
+                +
+                "」文件夹吗？\n\n文件夹内所有内容都会被删除。"
+            );
+
+            if(!result){
+                return;
+            }
+
+            delete DB[currentLibrary][name];
+
+            saveDB();
+
+            renderCategories();
+
+        };
+
+
+        /* =========================
+           长按拖动排序
+        ========================= */
+
+        enableDragSort(
+            div,
+            box,
+            function(){
+
+                let names=
+                Array.from(
+                    box.children
+                ).map(
+                    el=>el.dataset.categoryName
+                );
+
+                let newDB={};
+
+                names.forEach(n=>{
+
+                    newDB[n]=
+                    DB[currentLibrary][n];
+
+                });
+
+                DB[currentLibrary]=newDB;
+
+                saveDB();
+
+            }
+        );
+
+        div.dataset.categoryName=name;
+
+        box.appendChild(div);
+
+    });
+
+}
+
+
+
+
+function moveCategory(name,direction){
+
+    let keys=Object.keys(DB[currentLibrary]);
+
+    let index=keys.indexOf(name);
+
+    let newIndex=index+direction;
+
+    if(newIndex<0 || newIndex>=keys.length){
+        return;
+    }
+
+    let newDB={};
+
+    keys.forEach((key,i)=>{
+
+        if(i===newIndex){
+            newDB[name]=DB[currentLibrary][name];
+        }
+
+        if(i!==index){
+            newDB[key]=DB[currentLibrary][key];
+        }
+
+    });
+
+    DB[currentLibrary]=newDB;
+
+    saveDB();
+
+    renderCategories();
+}
+
+
+function createCategory(){
+
+
+let name=
+prompt("分类名称");
+
+
+
+if(!name)
+return;
+
+
+
+DB[currentLibrary][name]=[];
+
+
+saveDB();
+
+
+renderCategories();
+
+
+
+}
+
+
+
+
+
+
+
+function openCategory(name){
+
+
+
+currentCategory=name;
+
+
+
+$("libraryPage")
+.classList.add("hidden");
+
+
+
+$("categoryPage")
+.classList.remove("hidden");
+
+
+
+$("categoryTitle")
+.innerHTML=
+"📁 "+name;
+
+
+
+renderCards();
+
+
+
+}
+
+// =================================
+// NAI资料库 v4.2
+// JS Part 2
+// PNG解析 + 导入 + 图片墙
+// =================================
+
+
+
+
+
+
+// ===============================
+// 卡片渲染
+// 默认只显示图片
+// ===============================
+
+
+
+async function renderCards(){
+
+    let box =
+    $("cardWall");
+
+    box.innerHTML="";
+
+    let list =
+    DB[currentLibrary]
+    [currentCategory];
+
+
+    for(
+        let i=0;
+        i<list.length;
+        i++
+    ){
+
+        let item=list[i];
+
+        let src="";
+
+
+        if(
+            item.images &&
+            item.images.length
+        ){
+
+            src =
+            await getImage(
+                item.images[0]
+            );
+
+        }
+
+
+        let div =
+        document.createElement("div");
+
+        div.className=
+        "artist-card";
+
+
+        div.innerHTML=
+        `
+        ${src ?
+        `
+        <img 
+        src="${src}"
+        class="preview-img"
+        >
+        `
+        :""
+        }
+
+        <div class="card-content">
+
+        <button class="favorite-btn ${item.favorite ? "active" : ""}" title="${item.favorite ? "取消收藏" : "收藏"}">
+        ${item.favorite ? "★" : "☆"}
+        </button>
+
+        <div class="card-title">
+        ${item.name}
+        </div>
+
+        <button class="info-btn">
+        查看提示词
+        </button>
+
+        <button class="edit-btn">
+        编辑
+        </button>
+
+        <button class="delete-btn">
+        删除
+        </button>
+
+        </div>
+        `;
+
+
+        /* =========================
+           点击图片查看信息
+        ========================= */
+
+        if(src){
+
+            div.querySelector(".preview-img")
+            .onclick=function(){
+
+                showInfo(i);
+
+            };
+
+        }
+
+
+        /* =========================
+           收藏
+        ========================= */
+
+        div.querySelector(".favorite-btn")
+        .onclick=function(e){
+
+            e.stopPropagation();
+            item.favorite=!item.favorite;
+            saveDB();
+
+            this.classList.toggle("active",item.favorite);
+            this.textContent=item.favorite ? "★" : "☆";
+            this.title=item.favorite ? "取消收藏" : "收藏";
+
+        };
+
+
+        /* =========================
+           查看提示词
+        ========================= */
+
+        div.querySelector(".info-btn")
+        .onclick=function(){
+
+            showInfo(i);
+
+        };
+
+
+        /* =========================
+           编辑
+        ========================= */
+
+        div.querySelector(".edit-btn")
+        .onclick=function(){
+
+            editCard(i);
+
+        };
+
+
+        /* =========================
+           删除
+        ========================= */
+
+        div.querySelector(".delete-btn")
+        .onclick=function(){
+
+            deleteCard(i);
+
+        };
+
+
+        /* =========================
+           长按拖动排序
+        ========================= */
+
+        enableDragSort(
+            div,
+            box,
+            function(){
+
+                let newList=
+                Array.from(
+                    box.children
+                ).map(
+                    el=>el._artistItem
+                );
+
+                DB[currentLibrary]
+                [currentCategory]=newList;
+
+                saveDB();
+
+            }
+        );
+
+
+        div._artistItem=item;
+
+        box.appendChild(div);
+
+    }
+
+}
+
+
+
+// ===============================
+// 查看信息
+// ===============================
+
+
+
+async function showInfo(index){
+
+    const item = DB[currentLibrary][currentCategory][index];
+    if(!item) return;
+
+    let img="";
+    if(item.images && item.images.length){
+        img=await getImage(item.images[0]);
+    }
+
+    $("infoTitle").innerHTML=item.name || "未命名";
+
+    $("infoContent").innerHTML=`
+        ${img ? `<div class="info-main-image-wrap"><img class="info-main-image" src="${img}" alt=""></div>` : `<div class="info-main-image-wrap info-no-image">暂无预览图</div>`}
+
+        <div class="info-section">
+            <div class="info-label"><b>正面提示词</b></div>
+            <div id="promptText" class="info-prompt">${cleanText(item.prompt)}</div>
+            <button class="info-copy" onclick="copyPrompt(${index})">复制正面提示词</button>
+        </div>
+
+        <div class="info-section">
+            <div class="info-label"><b>负面提示词</b></div>
+            <div id="negativeText" class="info-prompt">${cleanText(item.negative)}</div>
+            <button class="info-copy" onclick="copyNegative(${index})">复制负面提示词</button>
+        </div>
+
+        <div class="info-meta">
+            <div><b>采样器：</b>${item.sampler || "未知"}</div>
+            <div><b>分辨率：</b>${item.width || "?"} × ${item.height || "?"}</div>
+        </div>
+    `;
+
+    $("infoModal").classList.remove("hidden");
+}
+
+
+
+function closeInfo(){
+
+
+$("infoModal")
+.classList.add("hidden");
+
+
+
+renderCards();
+
+
+}
+
+
+
+
+
+
+
+
+// ===============================
+// 导入窗口
+// ===============================
+
+
+
+function openImport(){
+
+
+$("importModal")
+.classList.remove("hidden");
+
+
+}
+
+
+
+function closeImport(){
+
+
+
+$("importModal")
+.classList.add("hidden");
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// PNG批量导入
+// ===============================
+
+
+
+$("pngInput")
+.onchange=
+async function(){
+
+
+
+let files =
+Array.from(
+this.files
+);
+
+
+
+if(
+!files.length
+)
+return;
+
+
+
+
+let progress =
+$("importProgress");
+
+
+
+let count=0;
+
+
+
+for(
+let file of files
+){
+
+
+
+count++;
+
+
+
+progress.innerHTML=
+
+`
+
+正在导入:
+
+${count}/${files.length}
+
+<br>
+
+${file.name}
+
+`;
+
+
+
+await importPNG(file);
+
+
+
+// 防止手机卡顿
+
+await new Promise(
+r=>setTimeout(r,80)
+);
+
+
+
+}
+
+
+
+saveDB();
+
+
+
+progress.innerHTML=
+"导入完成";
+
+
+
+renderCards();
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// ===============================
+// 单张图片
+// ===============================
+
+
+
+async function importPNG(file){
+
+
+
+let data =
+await parsePNG(file);
+
+
+
+let id =
+await saveImage(file);
+
+
+
+
+
+let item={
+
+
+
+name:
+file.name
+.replace(
+/\.png$/i,
+""
+),
+
+
+
+images:[
+id
+],
+
+
+
+prompt:
+data.prompt,
+
+
+
+negative:
+data.negative,
+
+
+
+sampler:
+data.sampler,
+
+
+
+width:
+data.width,
+
+
+
+height:
+data.height,
+
+
+
+seed:
+data.seed,
+
+
+
+steps:
+data.steps,
+
+
+
+cfg:
+data.cfg,
+
+
+
+model:
+data.model,
+
+
+
+vae:
+data.vae,
+
+
+
+raw:
+data.raw,
+
+
+
+time:
+Date.now()
+
+
+
+};
+
+
+
+
+
+DB[currentLibrary]
+[currentCategory]
+.push(item);
+
+
+
+}
+
+
+
+
+
+
+
+
+// ===============================
+// PNG读取
+// ===============================
+
+
+
+function parsePNG(file){
+
+
+return new Promise(resolve=>{
+
+
+let reader =
+new FileReader();
+
+
+
+reader.onload=function(e){
+
+
+
+let bytes =
+new Uint8Array(
+e.target.result
+);
+
+
+
+let text="";
+
+
+
+let offset=8;
+
+
+
+while(
+offset < bytes.length
+){
+
+
+
+let length =
+(
+bytes[offset]<<24
+)
+|
+(
+bytes[offset+1]<<16
+)
+|
+(
+bytes[offset+2]<<8
+)
+|
+bytes[offset+3];
+
+
+
+let type =
+String.fromCharCode(
+
+bytes[offset+4],
+
+bytes[offset+5],
+
+bytes[offset+6],
+
+bytes[offset+7]
+
+);
+
+
+
+
+
+if(
+type==="tEXt"
+||
+type==="iTXt"
+){
+
+
+let chunk =
+bytes.slice(
+offset+8,
+offset+8+length
+);
+
+
+
+text +=
+new TextDecoder()
+.decode(chunk);
+
+
+
+}
+
+
+
+if(
+type==="IEND"
+)
+break;
+
+
+
+offset +=
+length+12;
+
+
+
+}
+
+
+
+resolve(
+decodeNAI(text)
+);
+
+
+
+};
+
+
+
+
+
+reader.readAsArrayBuffer(
+
+file.slice(
+0,
+4*1024*1024
+)
+
+);
+
+
+
+});
+
+
+
+}
+
+// =================================
+// NAI资料库 v4.2
+// JS Part 3
+// 解析 + 编辑 + 删除 + 备份 + 初始化
+// =================================
+
+
+
+
+
+
+// ===============================
+// NAI参数解析
+// ===============================
+
+
+function decodeNAI(text){
+
+
+
+let data={
+
+
+prompt:"",
+
+negative:"",
+
+sampler:"",
+
+width:"",
+
+height:"",
+
+seed:"",
+
+steps:"",
+
+cfg:"",
+
+model:"",
+
+vae:"",
+
+raw:text
+
+
+};
+
+
+
+
+
+
+try{
+
+
+
+let start =
+text.indexOf("{");
+
+
+
+if(
+start>=0
+){
+
+
+
+let obj =
+JSON.parse(
+text.substring(start)
+);
+
+
+
+
+data.prompt =
+obj.prompt ||
+"";
+
+
+
+data.negative =
+obj.uc ||
+obj.negative ||
+"";
+
+
+
+data.sampler =
+obj.sampler ||
+obj.sampler_name ||
+"";
+
+
+
+data.seed =
+obj.seed ||
+"";
+
+
+
+data.steps =
+obj.steps ||
+"";
+
+
+
+data.cfg =
+obj.scale ||
+obj.cfg ||
+"";
+
+
+
+data.model =
+obj.model ||
+"";
+
+
+
+data.vae =
+obj.vae ||
+"";
+
+
+
+data.width =
+obj.width ||
+"";
+
+
+
+data.height =
+obj.height ||
+"";
+
+
+
+return data;
+
+
+
+}
+
+
+
+}
+catch(e){}
+
+
+
+let lines =
+text.split("\n");
+
+
+
+for(
+let line of lines
+){
+
+
+
+let l =
+line.toLowerCase();
+
+
+
+if(
+l.includes("negative")
+){
+
+data.negative +=
+line;
+
+}
+
+
+
+if(
+l.includes("sampler")
+){
+
+data.sampler =
+line;
+
+}
+
+
+
+if(
+l.includes("seed")
+){
+
+data.seed =
+line;
+
+}
+
+
+
+if(
+l.includes("steps")
+){
+
+data.steps =
+line;
+
+}
+
+
+
+if(
+l.includes("cfg")
+){
+
+data.cfg =
+line;
+
+}
+
+
+
+}
+
+
+
+data.prompt =
+text;
+
+
+
+return data;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+// ===============================
+// 删除
+// ===============================
+
+
+function deleteCard(index){
+
+    let list=DB[currentLibrary][currentCategory];
+    let item=list[index];
+
+    if(!item) return;
+
+    if(confirm("确定把「"+(item.name||"未命名")+"」移入回收站吗？")){
+
+        if(!Array.isArray(DB.recycleBin)){
+            DB.recycleBin=[];
+        }
+
+        DB.recycleBin.push({
+            item:item,
+            library:currentLibrary,
+            category:currentCategory,
+            deletedAt:Date.now()
+        });
+
+        list.splice(index,1);
+        saveDB();
+        renderCards();
+    }
+
+}
+
+
+
+// ===============================
+// 编辑
+// ===============================
+
+
+
+function editCard(index){
+
+
+
+editIndex=index;
+
+
+
+let item =
+DB[currentLibrary]
+[currentCategory]
+[index];
+
+
+
+$("artistName")
+.value =
+item.name;
+
+
+
+$("editTags").value =
+(item.tags || []).join(" ");
+"";
+
+
+
+$("editPositive")
+.value =
+item.prompt;
+
+
+
+$("editNegative")
+.value =
+item.negative;
+
+
+
+$("editParameter")
+.value =
+
+`
+
+Sampler:
+${item.sampler}
+
+
+Resolution:
+${item.width}×${item.height}
+
+
+Seed:
+${item.seed}
+
+
+Steps:
+${item.steps}
+
+
+CFG:
+${item.cfg}
+
+
+Model:
+${item.model}
+
+`;
+
+
+
+$("editNote")
+.value =
+item.note ||
+"";
+
+
+
+$("editModal")
+.classList.remove("hidden");
+
+
+
+}
+
+
+
+
+
+
+function saveEdit(){
+
+
+
+let item =
+DB[currentLibrary]
+[currentCategory]
+[editIndex];
+
+
+
+item.name =
+$("artistName")
+.value;
+
+
+let tagBox =
+$("editTags");
+
+
+if(tagBox){
+
+item.tags =
+tagBox.value
+.trim()
+.split(/\s+/)
+.filter(Boolean);
+
+}
+
+
+item.prompt =
+$("editPositive")
+.value;
+
+
+item.negative =
+$("editNegative")
+.value;
+
+
+
+item.note =
+$("editNote")
+.value;
+
+
+
+saveDB();
+
+
+
+closeEdit();
+
+
+
+renderCards();
+
+
+
+}
+
+
+
+
+function closeEdit(){
+
+
+$("editModal")
+.classList.add("hidden");
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// 搜索
+// ===============================
+
+
+function openSearch(){
+    const modal=$("searchModal");
+    if(modal) modal.classList.remove("hidden");
+    const input=$("searchInput");
+    if(input){
+        input.value="";
+        setTimeout(()=>input.focus(),80);
+    }
+    renderSearchResults("");
+}
+
+function closeSearch(){
+    window.__searchRequestId=(window.__searchRequestId||0)+1;
+    $("searchModal").classList.add("hidden");
+    $("searchInput").value="";
+    $("searchResult").innerHTML="";
+}
+
+window.__searchRequestId=0;
+
+async function renderSearchResults(rawKey){
+    const key=(rawKey||"").toLowerCase().trim();
+    const box=$("searchResult");
+    if(!box) return;
+    const requestId=++window.__searchRequestId;
+    box.innerHTML='<div class="search-loading" style="grid-column:1/-1;">正在整理资料…</div>';
+
+    const result=[];
+    ["artistThread","singleArtist"].forEach(libName=>{
+        const lib=DB[libName]||{};
+        Object.keys(lib).forEach(catName=>{
+            (lib[catName]||[]).forEach((item,index)=>{
+                const searchText=(
+                    (item.name||"")+" "+
+                    (item.prompt||"")+" "+
+                    (item.negative||"")+" "+
+                    ((item.tags||[]).join(" "))+" "+
+                    (item.note||"")+" "+
+                    (item.sampler||"")
+                ).toLowerCase();
+                if(!key || searchText.includes(key)){
+                    result.push({item,library:libName,category:catName,index});
+                }
+            });
+        });
+    });
+
+    if(requestId!==window.__searchRequestId) return;
+    box.innerHTML="";
+
+    if(!result.length){
+        box.innerHTML='<div class="utility-empty search-empty" style="grid-column:1/-1;">没有找到相关资料</div>';
+        return;
+    }
+
+    for(const entry of result){
+        let img="";
+        if(entry.item.images && entry.item.images.length){
+            img=await getImage(entry.item.images[0]);
+        }
+        if(requestId!==window.__searchRequestId) return;
+
+        const card=document.createElement("div");
+        card.className="search-result-card";
+        card.innerHTML=`
+            <div class="search-thumb">
+                ${img ? `<img src="${img}" class="search-img" alt="">` : `<div class="search-img search-no-img">暂无图片</div>`}
+            </div>
+            <div class="search-name">${escapeHTML(entry.item.name||"未命名")}</div>
+        `;
+
+        card.addEventListener("click",function(){
+            currentLibrary=entry.library;
+            currentCategory=entry.category;
+            $("searchModal").classList.add("hidden");
+            $("homePage").classList.add("hidden");
+            $("libraryPage").classList.add("hidden");
+            $("categoryPage").classList.remove("hidden");
+            $("categoryTitle").innerHTML="📁 "+escapeHTML(currentCategory);
+            renderCards();
+            showInfo(entry.index);
+        });
+        box.appendChild(card);
+    }
+}
+
+$("searchInput").oninput=function(){
+    renderSearchResults(this.value);
+};
+
+// ===============================
+// 移动端长按拖拽排序
+// ===============================
+// 采用“原卡片保留在原位置 + 浮动副本跟手”的方式，
+// 避免隐藏/删除原卡片后造成 Grid 中相邻卡片一起消失或重排。
+function enableDragSort(element,container,onSort){
+    let timer=null;
+    let dragging=false;
+    let startX=0,startY=0;
+    let lastX=0,lastY=0;
+    let offsetX=0,offsetY=0;
+    let ghost=null;
+    let suppressClick=false;
+    let positions=[];
+
+    function clearTimer(){
+        if(timer!==null){
+            clearTimeout(timer);
+            timer=null;
+        }
+    }
+
+    function getItems(){
+        return Array.from(container.children).filter(el=>
+            el!==element &&
+            (el.classList.contains("category-card") || el.classList.contains("artist-card"))
+        );
+    }
+
+    function snapshotPositions(){
+        positions=getItems().map(el=>{
+            const r=el.getBoundingClientRect();
+            return {
+                el:el,
+                left:r.left,
+                right:r.right,
+                top:r.top,
+                bottom:r.bottom,
+                cx:r.left+r.width/2,
+                cy:r.top+r.height/2
+            };
+        });
+    }
+
+    function findTarget(x,y){
+        if(!positions.length) return null;
+
+        let best=null;
+        let bestDistance=Infinity;
+
+        for(const p of positions){
+            const dx=x-p.cx;
+            const dy=y-p.cy;
+            const d=dx*dx+dy*dy;
+            if(d<bestDistance){
+                bestDistance=d;
+                best=p;
+            }
+        }
+
+        return best;
+    }
+
+    function createGhost(x,y){
+        if(dragging) return;
+
+        dragging=true;
+        suppressClick=true;
+
+        const r=element.getBoundingClientRect();
+        offsetX=x-r.left;
+        offsetY=y-r.top;
+        lastX=x;
+        lastY=y;
+
+        snapshotPositions();
+
+        // 只让当前卡片变淡，绝不把相邻卡片设为 hidden。
+        // 原卡片继续占据 Grid 单元格，避免布局塌陷。
+        element.style.opacity=".25";
+        element.style.pointerEvents="none";
+        element.classList.add("sorting");
+
+        ghost=element.cloneNode(true);
+        ghost.classList.remove("sorting");
+        ghost.style.position="fixed";
+        ghost.style.left=(x-offsetX)+"px";
+        ghost.style.top=(y-offsetY)+"px";
+        ghost.style.width=r.width+"px";
+        ghost.style.height=r.height+"px";
+        ghost.style.margin="0";
+        ghost.style.zIndex="2147483647";
+        ghost.style.pointerEvents="none";
+        ghost.style.boxSizing="border-box";
+        ghost.style.opacity=".92";
+        ghost.style.transform="scale(1.03)";
+        document.body.appendChild(ghost);
+
+        document.body.style.userSelect="none";
+        document.body.style.webkitUserSelect="none";
+        document.body.style.webkitTouchCallout="none";
+    }
+
+    function finish(cancelled){
+        clearTimer();
+
+        if(!dragging){
+            return;
+        }
+
+        dragging=false;
+
+        if(!cancelled){
+            const target=findTarget(lastX,lastY);
+
+            if(target && target.el && target.el.parentNode===container){
+                const all=Array.from(container.children).filter(el=>
+                    el.classList.contains("category-card") || el.classList.contains("artist-card")
+                );
+                const from=all.indexOf(element);
+                const to=all.indexOf(target.el);
+
+                if(from!==-1 && to!==-1 && from!==to){
+                    if(from<to){
+                        container.insertBefore(element,target.el.nextSibling);
+                    }else{
+                        container.insertBefore(element,target.el);
+                    }
+                }
+            }
+        }
+
+        if(ghost){
+            ghost.remove();
+            ghost=null;
+        }
+
+        element.style.opacity="";
+        element.style.pointerEvents="";
+        element.classList.remove("sorting");
+
+        document.body.style.userSelect="";
+        document.body.style.webkitUserSelect="";
+        document.body.style.webkitTouchCallout="";
+
+        positions=[];
+
+        if(!cancelled){
+            onSort();
+        }
+
+        setTimeout(()=>{
+            suppressClick=false;
+        },0);
+    }
+
+    element.addEventListener("touchstart",function(e){
+        if(e.touches.length!==1) return;
+        if(e.target.closest("button,input,textarea,select,a")) return;
+        if(dragging) return;
+
+        const t=e.touches[0];
+        startX=lastX=t.clientX;
+        startY=lastY=t.clientY;
+        clearTimer();
+
+        timer=setTimeout(function(){
+            timer=null;
+            createGhost(startX,startY);
+        },550);
+    },{passive:true});
+
+    element.addEventListener("touchmove",function(e){
+        if(e.touches.length!==1) return;
+
+        const t=e.touches[0];
+        lastX=t.clientX;
+        lastY=t.clientY;
+
+        if(!dragging){
+            if(Math.abs(t.clientX-startX)>8 || Math.abs(t.clientY-startY)>8){
+                clearTimer();
+            }
+            return;
+        }
+
+        e.preventDefault();
+
+        if(ghost){
+            ghost.style.left=(t.clientX-offsetX)+"px";
+            ghost.style.top=(t.clientY-offsetY)+"px";
+        }
+    },{passive:false});
+
+    element.addEventListener("touchend",function(e){
+        if(!dragging){
+            clearTimer();
+            return;
+        }
+
+        if(e.changedTouches && e.changedTouches[0]){
+            lastX=e.changedTouches[0].clientX;
+            lastY=e.changedTouches[0].clientY;
+        }
+
+        finish(false);
+    },{passive:true});
+
+    element.addEventListener("touchcancel",function(){
+        finish(true);
+    });
+
+    element.addEventListener("click",function(e){
+        if(suppressClick){
+            e.preventDefault();
+            e.stopPropagation();
+            suppressClick=false;
+        }
+    },true);
+
+    element.addEventListener("dragstart",function(e){
+        e.preventDefault();
+    });
+}
+
+
+// ===============================
+// 收藏 / 回收站
+// ===============================
+
+function getAllArtistItems(){
+    let result=[];
+    ["artistThread","singleArtist"].forEach(lib=>{
+        if(!DB[lib]) return;
+        Object.keys(DB[lib]).forEach(cat=>{
+            (DB[lib][cat]||[]).forEach(item=>{
+                result.push({item:item,library:lib,category:cat});
+            });
+        });
+    });
+    return result;
+}
+
+function openFavoriteItem(entry){
+    const list=(DB[entry.library]&&DB[entry.library][entry.category])||[];
+    const index=list.indexOf(entry.item);
+    if(index===-1) return;
+    currentLibrary=entry.library;
+    currentCategory=entry.category;
+    closeFavorites();
+    $("homePage").classList.add("hidden");
+    $("libraryPage").classList.add("hidden");
+    $("categoryPage").classList.remove("hidden");
+    $("categoryTitle").innerHTML="📁 "+currentCategory;
+    renderCards();
+    showInfo(index);
+}
+
+function openFavorites(){
+    renderFavorites();
+    $("favoriteModal").classList.remove("hidden");
+}
+
+function closeFavorites(){
+    $("favoriteModal").classList.add("hidden");
+}
+
+async function renderFavorites(){
+    let box=$("favoriteList");
+    box.innerHTML="";
+    let list=getAllArtistItems().filter(x=>x.item.favorite);
+
+    if(!list.length){
+        box.innerHTML='<div class="utility-empty">还没有收藏的画师资料 ✨</div>';
+        return;
+    }
+
+    for(const entry of list){
+        const item=entry.item;
+        let img="";
+        if(item.images && item.images.length) img=await getImage(item.images[0]);
+
+        let div=document.createElement("div");
+        div.className="utility-card";
+        div.innerHTML=`
+            ${img ? `<img src="${img}">` : `<div></div>`}
+            <div>
+                <div class="utility-card-title">${item.name||"未命名"}</div>
+                <div class="utility-card-meta">${entry.library==="artistThread"?"画师串":"单画师"} · ${entry.category}</div>
+                <button class="open-fav">打开</button>
+                <button class="unfav">取消收藏</button>
+            </div>
+        `;
+
+        div.onclick=function(e){
+            if(e.target.closest("button")) return;
+            openFavoriteItem(entry);
+        };
+
+        div.querySelector(".utility-card-title").onclick=function(){
+            openFavoriteItem(entry);
+        };
+
+        div.querySelector("img")?.addEventListener("click",function(){
+            openFavoriteItem(entry);
+        });
+
+        div.querySelector(".open-fav").onclick=function(){
+            openFavoriteItem(entry);
+        };
+
+        div.querySelector(".unfav").onclick=function(){
+            item.favorite=false;
+            saveDB();
+            renderFavorites();
+        };
+
+        box.appendChild(div);
+    }
+}
+
+function openRecycleBin(){
+    renderRecycleBin();
+    $("recycleModal").classList.remove("hidden");
+}
+
+function closeRecycleBin(){
+    $("recycleModal").classList.add("hidden");
+}
+
+async function renderRecycleBin(){
+    if(!Array.isArray(DB.recycleBin)) DB.recycleBin=[];
+    let box=$("recycleList");
+    box.innerHTML="";
+
+    if(!DB.recycleBin.length){
+        box.innerHTML='<div class="utility-empty">回收站是空的 🌱</div>';
+        return;
+    }
+
+    for(let i=DB.recycleBin.length-1;i>=0;i--){
+        const entry=DB.recycleBin[i];
+        const item=entry.item||{};
+        let img="";
+        if(item.images && item.images.length) img=await getImage(item.images[0]);
+
+        let div=document.createElement("div");
+        div.className="utility-card";
+        div.innerHTML=`
+            ${img ? `<img src="${img}">` : `<div></div>`}
+            <div>
+                <div class="utility-card-title">${item.name||"未命名"}</div>
+                <div class="utility-card-meta">原位置：${entry.category||"未知分类"}</div>
+                <button class="restore">恢复</button>
+                <button class="permanent">永久删除</button>
+            </div>
+        `;
+
+        div.querySelector(".restore").onclick=function(){
+            let lib=entry.library||"artistThread";
+            let cat=entry.category||"默认分类";
+            if(!DB[lib]) DB[lib]={};
+            if(!Array.isArray(DB[lib][cat])) DB[lib][cat]=[];
+            DB[lib][cat].push(entry.item);
+            DB.recycleBin.splice(i,1);
+            saveDB();
+            renderRecycleBin();
+        };
+
+        div.querySelector(".permanent").onclick=function(){
+            if(!confirm("永久删除后将无法恢复，确定吗？")) return;
+            DB.recycleBin.splice(i,1);
+            saveDB();
+            renderRecycleBin();
+        };
+
+        box.appendChild(div);
+    }
+}
+
+function emptyRecycleBin(){
+    if(!Array.isArray(DB.recycleBin) || !DB.recycleBin.length){
+        alert("回收站已经是空的");
+        return;
+    }
+    if(confirm("确定清空回收站吗？清空后无法恢复。")){
+        DB.recycleBin=[];
+        saveDB();
+        renderRecycleBin();
+    }
+}
+
+
+
+// ===============================
+// 导出
+// ===============================
+
+
+
+function exportData(){
+
+
+
+let blob =
+new Blob(
+
+[
+
+JSON.stringify(
+DB,
+null,
+2
+)
+
+],
+
+{
+type:"application/json"
+}
+
+);
+
+
+
+let url =
+URL.createObjectURL(blob);
+
+
+
+let a =
+document.createElement("a");
+
+
+
+a.href=url;
+
+
+
+a.download=
+"NAI资料库.json";
+
+
+
+a.click();
+
+
+
+URL.revokeObjectURL(url);
+
+
+
+}
+
+
+function importBackup(){
+
+let input=document.getElementById("backupInput");
+
+
+input.click();
+
+
+input.onchange=function(){
+
+let file=this.files[0];
+
+
+if(!file)
+return;
+
+
+let reader=new FileReader();
+
+
+reader.onload=function(e){
+
+try{
+
+let data=JSON.parse(e.target.result);
+
+
+if(
+!data.artistThread ||
+!data.singleArtist
+){
+
+alert("备份文件格式错误");
+
+return;
+
+}
+
+
+if(
+!confirm("导入备份会覆盖当前所有数据，确定继续吗？")
+){
+
+return;
+
+}
+
+
+DB=data;
+
+
+saveDB();
+
+
+alert("备份恢复成功");
+
+
+loadRecent();
+
+
+}
+
+catch(err){
+
+alert("JSON文件读取失败");
+
+}
+
+
+};
+
+
+reader.readAsText(file);
+
+
+};
+
+
+}
+
+
+
+
+
+
+// ===============================
+// 最近添加
+// ===============================
+
+
+
+async function loadRecent(){
+
+
+
+let box =
+$("recentList");
+
+
+
+box.innerHTML="";
+
+
+
+let arr=[];
+
+
+
+["artistThread","singleArtist"].forEach(libName=>{
+
+let lib=DB[libName]||{};
+
+Object.values(lib)
+.forEach(cat=>{
+
+
+arr.push(
+...cat
+);
+
+
+
+});
+
+
+});
+
+
+
+
+arr.sort(
+(a,b)=>
+b.time-a.time
+);
+
+
+
+
+
+for(
+let item of arr.slice(0,6)
+){
+
+
+
+let div =
+document.createElement("div");
+
+
+
+div.className=
+"artist-card";
+
+
+
+let src="";
+
+
+
+if(
+item.images.length
+){
+
+src=
+await getImage(
+item.images[0]
+);
+
+}
+
+
+
+div.innerHTML=
+
+`
+
+<img src="${src}">
+
+
+<div class="card-content">
+
+${item.name}
+
+</div>
+
+`;
+
+
+
+box.appendChild(div);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// 启动
+// ===============================
+
+
+async function start(){
+
+
+
+await initImageDB();
+
+
+
+loadRecent();
+
+
+
+}
+
+function copyPrompt(index){
+
+
+let item =
+DB[currentLibrary]
+[currentCategory]
+[index];
+
+
+copyToClipboard(
+item.prompt || ""
+);
+
+
+alert("正面提示词已复制");
+
+}
+
+
+
+function copyNegative(index){
+
+
+let item =
+DB[currentLibrary]
+[currentCategory]
+[index];
+
+
+copyToClipboard(
+item.negative || ""
+);
+
+
+alert("负面提示词已复制");
+
+}
+
+function cleanText(text){
+
+
+if(!text)
+return "无";
+
+
+
+return text
+
+.replace(/\n\s*\n\s*\n+/g,"\n\n")
+
+.replace(/[ ]{2,}/g," ")
+
+.trim();
+
+
+}
+
+start();
+
+// ===============================
+// 图片排列数量
+// ===============================
+
+
+let columns =
+Number(
+localStorage.getItem(
+"NAI_COLUMNS"
+)
+)
+||
+3;
+
+
+
+function setColumns(){
+
+    document.documentElement
+    .style
+    .setProperty(
+        "--cols",
+        columns
+    );
+
+    updateColumnMenu();
+}
+
+
+
+
+function updateColumnMenu(){
+
+    let menu=$("columnMenu");
+    if(!menu) return;
+
+    menu.querySelectorAll("button").forEach(btn=>{
+        btn.classList.toggle(
+            "active",
+            Number(btn.textContent.replace("个",""))===columns
+        );
+    });
+}
+
+function toggleColumnMenu(){
+
+    let menu=$("columnMenu");
+    if(!menu) return;
+
+    menu.classList.toggle("hidden");
+    updateColumnMenu();
+}
+
+function setColumnsChoice(value){
+
+    value=Number(value);
+
+    if(value<2 || value>6) return;
+
+    columns=value;
+
+    localStorage.setItem(
+        "NAI_COLUMNS",
+        columns
+    );
+
+    setColumns();
+    updateColumnMenu();
+
+    let menu=$("columnMenu");
+    if(menu){
+        menu.classList.add("hidden");
+    }
+}
+
+function changeColumns(){
+    toggleColumnMenu();
+}
+
+
+
+
+setColumns();
+
+function openUpdateLog(){
+    const modal=$("updateLogModal");
+    if(modal) modal.classList.remove("hidden");
+}
+
+function closeUpdateLog(){
+    const modal=$("updateLogModal");
+    if(modal) modal.classList.add("hidden");
+}
+
+function escapeHTML(text){
+    return String(text==null?"":text).replace(/[&<>"']/g, function(ch){
+        return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[ch];
+    });
+}
+
+
+function copyToClipboard(text){
+
+
+let textarea =
+document.createElement("textarea");
+
+
+textarea.value=text;
+
+
+textarea.style.position="fixed";
+textarea.style.left="-9999px";
+
+
+document.body.appendChild(textarea);
+
+
+textarea.select();
+
+
+document.execCommand("copy");
+
+
+document.body.removeChild(textarea);
+
+
+
+alert("已复制");
+
+
+}
+
+
+</script>
+
+
+</body>
+</html>
