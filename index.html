@@ -1619,6 +1619,7 @@ placeholder="搜索Prompt/画师">
 }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script>
 
 // =================================
@@ -3857,148 +3858,221 @@ function emptyRecycleBin(){
 
 
 
-function exportData(){
-
-
-
-let blob =
-new Blob(
-
-[
-
-JSON.stringify(
-DB,
-null,
-2
-)
-
-],
-
-{
-type:"application/json"
+async function readAllImageRecords(){
+    if(!imageDB) await initImageDB();
+    return await new Promise((resolve,reject)=>{
+        try{
+            const tx=imageDB.transaction("img","readonly");
+            const req=tx.objectStore("img").getAll();
+            req.onsuccess=()=>resolve(req.result||[]);
+            req.onerror=()=>reject(req.error||new Error("读取图片失败"));
+        }catch(err){ reject(err); }
+    });
 }
 
-);
-
-
-
-let url =
-URL.createObjectURL(blob);
-
-
-
-let a =
-document.createElement("a");
-
-
-
-a.href=url;
-
-
-
-a.download=
-"NAI资料库.json";
-
-
-
-a.click();
-
-
-
-URL.revokeObjectURL(url);
-
-
-
+function cloneDBForBackup(){
+    return JSON.parse(JSON.stringify(DB));
 }
 
+function collectReferencedImageIds(obj, set){
+    if(!obj || typeof obj!=="object") return;
+    if(Array.isArray(obj)){
+        for(const v of obj) collectReferencedImageIds(v,set);
+        return;
+    }
+    for(const k of Object.keys(obj)){
+        const v=obj[k];
+        if(k==="images" && Array.isArray(v)){
+            for(const id of v){ if(id!==undefined && id!==null) set.add(String(id)); }
+        }else if(v && typeof v==="object"){
+            collectReferencedImageIds(v,set);
+        }
+    }
+}
+
+function remapImageIds(obj, map){
+    if(!obj || typeof obj!=="object") return;
+    if(Array.isArray(obj)){
+        for(const v of obj) remapImageIds(v,map);
+        return;
+    }
+    for(const k of Object.keys(obj)){
+        if(k==="images" && Array.isArray(obj[k])){
+            obj[k]=obj[k].map(id=>map[String(id)]||id);
+        }else if(obj[k] && typeof obj[k]==="object"){
+            remapImageIds(obj[k],map);
+        }
+    }
+}
+
+function dataUrlInfo(data){
+    const m=String(data||"").match(/^data:([^;,]+)(?:;charset=[^;,]+)?;base64,(.*)$/s);
+    if(!m) return null;
+    const mime=m[1].toLowerCase();
+    return {mime,base64:m[2]};
+}
+
+async function exportData(){
+    try{
+        const records=await readAllImageRecords();
+        const usedIds=new Set();
+        collectReferencedImageIds(DB,usedIds);
+
+        // 只备份资料库真正引用到的图片。IndexedDB 里可能存在以前删除/重复留下的孤儿记录，
+        // 它们不是用户实际使用的图片，不应该把备份文件越撑越大。
+        const referenced=records.filter(rec=>rec && usedIds.has(String(rec.id)) && rec.data);
+        const byData=new Map();
+        const idMap={};
+        const unique=[];
+
+        for(const rec of referenced){
+            const info=dataUrlInfo(rec.data);
+            if(!info) continue;
+            const key=rec.data;
+            const sid=String(rec.id);
+            if(byData.has(key)){
+                idMap[sid]=byData.get(key).id;
+            }else{
+                const clean={id:sid,data:rec.data};
+                byData.set(key,clean);
+                idMap[sid]=sid;
+                unique.push(clean);
+            }
+        }
+
+        const backupDB=cloneDBForBackup();
+        remapImageIds(backupDB,idMap);
+        backupDB.__NAI_BACKUP_V5=true;
+        backupDB.__backupVersion=5;
+
+        // JSON 里保存图片 data URL，确保 GitHub Pages 的导入框也能直接选择。
+        // 不使用 ZIP，避免用户还要解压文件。
+        const payload={
+            __NAI_BACKUP_V5:true,
+            __backupVersion:5,
+            database:backupDB,
+            images:{}
+        };
+        for(const rec of unique) payload.images[rec.id]=rec.data;
+
+        const json=JSON.stringify(payload);
+        const blob=new Blob([json],{type:"application/json;charset=utf-8"});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement("a");
+        a.href=url;
+        a.download="NAI资料库_完整备份.json";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),3000);
+
+        alert(
+            "完整 JSON 备份成功！\n\n"+
+            "IndexedDB 图片记录："+records.length+" 条\n"+
+            "资料库实际引用："+usedIds.size+" 条\n"+
+            "本次真正备份："+unique.length+" 张\n\n"+
+            "已经只保留资料库正在使用的图片，并自动去除重复图片。"
+        );
+    }catch(err){
+        console.error(err);
+        alert("完整备份失败："+(err&&err.message?err.message:err));
+    }
+}
 
 function importBackup(){
+    const input=document.getElementById("backupInput");
+    input.value="";
+    input.click();
 
-let input=document.getElementById("backupInput");
+    input.onchange=async function(){
+        const file=this.files[0];
+        if(!file)return;
 
+        try{
+            const text=await file.text();
+            let raw;
+            try{
+                raw=JSON.parse(text);
+            }catch(parseErr){
+                throw new Error("JSON 文件无法解析。请确认选择的是本程序导出的“NAI资料库_完整备份.json”，不要选择网页文件或其他 JSON。");
+            }
 
-input.click();
+            let data=raw;
+            let imageEntries=[];
+            let complete=false;
 
+            // V5：{database:{...},images:{id:data}}
+            if(raw && raw.database && raw.database.artistThread && raw.database.singleArtist){
+                data=raw.database;
+            }else if(raw && raw.db && raw.db.artistThread && raw.db.singleArtist){
+                data=raw.db;
+            }
 
-input.onchange=function(){
+            const images=raw && raw.images;
+            if(images && typeof images==="object" && !Array.isArray(images)){
+                for(const id of Object.keys(images)){
+                    if(images[id]) imageEntries.push({id:String(id),data:images[id]});
+                }
+            }else if(Array.isArray(images)){
+                for(const rec of images){
+                    if(rec && rec.id && rec.data) imageEntries.push({id:String(rec.id),data:rec.data});
+                }
+            }
 
-let file=this.files[0];
+            complete=imageEntries.length>0 || !!(raw&&raw.__NAI_BACKUP_V3) || !!(raw&&raw.__NAI_BACKUP_V4) || !!(raw&&raw.__NAI_BACKUP_V5);
 
+            if(!data || !data.artistThread || !data.singleArtist){
+                alert("备份格式错误。\n\n请导入原来的 NAI资料库.json，或本程序导出的 NAI资料库_完整备份.json。");
+                return;
+            }
 
-if(!file)
-return;
+            let message="导入备份会覆盖当前资料数据，确定继续吗？";
+            if(complete) message+="\n\n检测到完整图片备份："+imageEntries.length+" 张。";
+            else message+="\n\n这是旧版 JSON，不包含图片。";
+            if(!confirm(message)) return;
 
+            if(!imageDB) await initImageDB();
+            DB={...data};
+            delete DB.__NAI_BACKUP_V3;
+            delete DB.__NAI_BACKUP_V4;
+            delete DB.__NAI_BACKUP_V5;
+            delete DB.__backupVersion;
+            delete DB.images;
+            saveDB();
 
-let reader=new FileReader();
+            if(complete && imageEntries.length){
+                await new Promise((resolve,reject)=>{
+                    try{
+                        const tx=imageDB.transaction("img","readwrite");
+                        const store=tx.objectStore("img");
+                        const clearReq=store.clear();
+                        clearReq.onerror=()=>reject(clearReq.error||new Error("清理图片失败"));
+                        clearReq.onsuccess=()=>{ for(const rec of imageEntries) store.put(rec); };
+                        tx.oncomplete=()=>resolve();
+                        tx.onerror=()=>reject(tx.error||new Error("恢复图片失败"));
+                        tx.onabort=()=>reject(tx.error||new Error("恢复图片事务中止"));
+                    }catch(err){reject(err);}
+                });
+            }
 
-
-reader.onload=function(e){
-
-try{
-
-let data=JSON.parse(e.target.result);
-
-
-if(
-!data.artistThread ||
-!data.singleArtist
-){
-
-alert("备份文件格式错误");
-
-return;
-
+            alert("备份恢复成功！\n\n"+(complete ? "资料 + "+imageEntries.length+" 张图片已恢复。" : "资料已恢复，但旧版 JSON 没有图片。"));
+            loadRecent();
+        }catch(err){
+            console.error(err);
+            alert("备份读取失败："+(err&&err.message?err.message:"未知错误")+"\n\n请确认这是本程序导出的完整 JSON 备份文件。旧版普通 JSON 仍然可以导入，但旧版 JSON 本身不含图片。");
+        }finally{
+            input.value="";
+        }
+    };
 }
-
-
-if(
-!confirm("导入备份会覆盖当前所有数据，确定继续吗？")
-){
-
-return;
-
-}
-
-
-DB=data;
-
-
-saveDB();
-
-
-alert("备份恢复成功");
-
-
-loadRecent();
-
-
-}
-
-catch(err){
-
-alert("JSON文件读取失败");
-
-}
-
-
-};
-
-
-reader.readAsText(file);
-
-
-};
-
-
-}
-
-
-
-
-
 
 // ===============================
 // 最近添加
+// ===============================
+
+
+
+
 // ===============================
 
 
