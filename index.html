@@ -451,6 +451,22 @@ border-radius:15px;
 
 }
 
+#imageViewer{
+z-index:40;
+padding:18px;
+box-sizing:border-box;
+background:rgba(24,20,19,.88);
+backdrop-filter:blur(8px);
+-webkit-backdrop-filter:blur(8px);
+}
+#imageViewer #bigImage{
+display:block;
+max-width:96vw;
+max-height:88vh;
+object-fit:contain;
+box-shadow:0 18px 55px rgba(0,0,0,.38);
+}
+
 
 
 
@@ -3494,6 +3510,7 @@ placeholder="搜索Prompt/画师">
 <div class="update-item"><span>03</span><div><b>多列排列优化</b><p>优化画师卡片在 2～6 列排列下的自适应显示，三列及以上自动收紧字号、按钮与间距，避免文字被挤成竖排，让手机浏览更整齐。</p></div></div>
 <div class="update-item"><span>04</span><div><b>Danbooru 画师搜索升级</b><p>按画师名与别名严格匹配，增加作品预览与保存到我的画师库。</p></div></div>
 <div class="update-item"><span>05</span><div><b>首页重新排版</b><p>缩小按钮层级，整理搜索、Danbooru、备份与收藏入口，手机上更清爽。</p></div></div>
+<div class="update-item"><span>06</span><div><b>Danbooru 搜索正式接入</b><p>现在可以搜索 Danbooru 画师与别名、浏览作品图片，并将画师和图片保存到自己的画师库。</p></div></div>
   </div>
 </div>
 <div class="v27-date-group">
@@ -3639,7 +3656,7 @@ placeholder="搜索Prompt/画师">
     border-top:1px solid #eaded3;
 }
 
-.danbooru-box{max-width:680px;width:min(94vw,680px);max-height:90vh;padding:18px;box-sizing:border-box;background:#fffaf6;}
+.danbooru-box{max-width:680px;width:min(94vw,680px);height:min(88vh,760px);height:min(88dvh,760px);max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);padding:18px;box-sizing:border-box;background:#fffaf6;display:flex;flex-direction:column;overflow:hidden;}
 .danbooru-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:13px;}
 .danbooru-head h3{margin:0;font-size:20px;letter-spacing:.5px;}
 .danbooru-sub{margin-top:5px;color:#a18f83;font-size:11px;}
@@ -3647,6 +3664,7 @@ placeholder="搜索Prompt/画师">
 .danbooru-search-row input{flex:1;min-width:0;}
 .danbooru-search-row button{width:76px;margin:0;}
 .danbooru-status{padding:9px 2px;color:#9a887c;font-size:12px;}
+#danbooruResult{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-right:2px;}
 .danbooru-artist{border:1px solid rgba(185,139,103,.16);background:#fffdfa;border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 5px 18px rgba(91,65,45,.035);}
 .danbooru-artist-title{font-size:18px;font-weight:700;color:#4b3c34;word-break:break-all;}
 .danbooru-alias{margin-top:5px;color:#806f64;font-size:12px;line-height:1.55;word-break:break-word;}
@@ -3668,8 +3686,8 @@ body.night .danbooru-artist{background:#302e31;border-color:#4b4644;}
 body.night .danbooru-artist-title{color:#eee5dd;}
 body.night .danbooru-alias,body.night .danbooru-status,body.night .danbooru-preview-title{color:#aaa09a;}
 body.night .danbooru-tag{background:#453d3a;color:#d8ccc3;}
-body.night .danbooru-open{background:#3a3635!important;color:#d8ccc3!important;border-color:#514a47!important;}
-@media(max-width:520px){.danbooru-posts{grid-template-columns:repeat(3,minmax(0,1fr));}.danbooru-post{aspect-ratio:1/1.12;}.danbooru-box{padding:15px;}.danbooru-actions button{font-size:12px;}}
+body.night .danbooru-open{background:#5a4942!important;color:#fff4ec!important;border:1px solid #8a6958!important;box-shadow:0 4px 12px rgba(15,10,8,.20),inset 0 1px 0 rgba(255,255,255,.08)!important;}
+@media(max-width:520px){#danbooruModal{padding:calc(env(safe-area-inset-top,0px) + 8px) 10px calc(env(safe-area-inset-bottom,0px) + 8px);box-sizing:border-box;overflow:hidden;}.danbooru-posts{grid-template-columns:repeat(3,minmax(0,1fr));}.danbooru-post{aspect-ratio:1/1.12;}.danbooru-box{width:100%;height:100%;max-height:100%;padding:15px;border-radius:22px;}.danbooru-head,.danbooru-search-row,.danbooru-status{flex:0 0 auto;}.danbooru-actions button{font-size:12px;}}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -6723,7 +6741,22 @@ function danbooruImageCandidates(p){
 }
 function danbooruImageFallback(img){
  try{const q=JSON.parse(img.dataset.fallback||"[]");if(q.length){img.dataset.fallback=JSON.stringify(q.slice(1));img.src=q[0];return}}catch(e){}
- img.onerror=null;const box=img.parentElement;img.remove();if(box){box.classList.add("image-failed");const d=document.createElement("div");d.className="danbooru-image-placeholder";d.innerHTML="图片暂时无法加载<br><small>仍可点击这里打开 Danbooru 原作</small>";box.insertBefore(d,box.firstChild)}
+ img.onerror=null;const box=img.parentElement;img.remove();if(box){box.classList.add("image-failed");const d=document.createElement("div");d.className="danbooru-image-placeholder";d.innerHTML="图片暂时无法加载<br><small>可使用上方按钮打开 Danbooru</small>";box.insertBefore(d,box.firstChild)}
+}
+function openDanbooruImage(imageUrl,previewUrl){
+ const modal=$("imageViewer"),img=$("bigImage");
+ if(!modal||!img||!imageUrl)return;
+ img.onerror=()=>{
+  img.onerror=null;
+  if(previewUrl&&previewUrl!==imageUrl)img.src=previewUrl;
+ };
+ img.src=imageUrl;
+ modal.classList.remove("hidden");
+}
+function closeImage(){
+ const modal=$("imageViewer"),img=$("bigImage");
+ if(modal)modal.classList.add("hidden");
+ if(img){img.onerror=null;img.removeAttribute("src");}
 }
 async function loadDanbooruPosts(a,target){
  const name=artistNameFromResult(a);if(!name)return;
@@ -6732,8 +6765,8 @@ async function loadDanbooruPosts(a,target){
   const url=new URL("https://danbooru.donmai.us/posts.json");url.searchParams.set("tags",name);url.searchParams.set("limit","6");
   const posts=await danbooruFetch(url.toString()),valid=(Array.isArray(posts)?posts:[]).filter(p=>p&&p.id);
   if(!valid.length){target.innerHTML='<div class="danbooru-preview-title">作品预览</div><div class="danbooru-empty">这个画师暂时没有可预览作品</div>';return}
-  const cards=valid.map(p=>{const link=`https://danbooru.donmai.us/posts/${p.id}`,s=danbooruImageCandidates(p);if(!s.length)return `<div class="danbooru-post image-failed" onclick="window.open('${link}','_blank')"><div class="danbooru-image-placeholder">图片地址不可用<br><small>点这里打开原作</small></div><small>#${escapeHtml(p.id)}</small></div>`;return `<div class="danbooru-post" onclick="window.open('${link}','_blank')"><img loading="lazy" decoding="async" src="${escapeHtml(s[0])}" data-fallback="${escapeHtml(JSON.stringify(s.slice(1)))}" onerror="danbooruImageFallback(this)"><small>#${escapeHtml(p.id)}</small></div>`}).join("");
-  target.innerHTML='<div class="danbooru-preview-title">作品预览 · 点击图片打开原作</div><div class="danbooru-posts">'+cards+'</div>';
+  const cards=valid.map(p=>{const s=danbooruImageCandidates(p);if(!s.length)return `<div class="danbooru-post image-failed"><div class="danbooru-image-placeholder">图片地址不可用<br><small>可使用上方按钮打开 Danbooru</small></div><small>#${escapeHtml(p.id)}</small></div>`;const large=s.find(u=>/\/720x720\//.test(u))||s.find(u=>/\/sample\//.test(u))||s[1]||s[0];return `<div class="danbooru-post" data-large="${escapeHtml(large)}" data-preview="${escapeHtml(s[0])}" onclick="openDanbooruImage(this.dataset.large,this.dataset.preview)"><img loading="lazy" decoding="async" src="${escapeHtml(s[0])}" data-fallback="${escapeHtml(JSON.stringify(s.slice(1)))}" onerror="danbooruImageFallback(this)"><small>#${escapeHtml(p.id)}</small></div>`}).join("");
+  target.innerHTML='<div class="danbooru-preview-title">作品预览 · 点击图片查看大图</div><div class="danbooru-posts">'+cards+'</div>';
  }catch(e){console.warn("Danbooru preview failed",e);target.innerHTML='<div class="danbooru-preview-title">作品预览</div><div class="danbooru-empty">作品已经搜到，但当前浏览器没有成功读取 Danbooru 图片文件。<br>帖子编号仍可正常打开原作。</div>'}
 }
 
