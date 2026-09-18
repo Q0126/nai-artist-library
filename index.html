@@ -6573,7 +6573,7 @@ function closeDanbooruSearch(){ $("danbooruModal").classList.add("hidden"); }
 function escapeHtml(s){
     return String(s??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
 }
-function danbooruUrl(name){ return "https://danbooru.donmai.us/artists/"+encodeURIComponent(name); }
+function danbooruUrl(name){ return "https://danbooru.donmai.us/posts?tags="+encodeURIComponent(name); }
 function danbooruPostsUrl(name){ return "https://danbooru.donmai.us/posts?tags="+encodeURIComponent(name); }
 async function danbooruFetch(url){
     const r=await fetch(url,{headers:{"Accept":"application/json"}});
