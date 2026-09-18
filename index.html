@@ -2950,6 +2950,51 @@ body.night .recycle-folder-real .folder-trash-icon{
 </style>
 
 
+<style id="v50-detail-back-and-tags">
+/* 返回键放进详情卡片，和内容保持紧凑距离 */
+#infoModal{
+  padding:calc(env(safe-area-inset-top,0px) + 10px) 0 calc(env(safe-area-inset-bottom,0px) + 10px)!important;
+}
+#infoModal .modal-box{
+  max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 20px)!important;
+}
+#infoModal #infoBack{
+  position:sticky!important;
+  top:0!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  display:block!important;
+  width:max-content!important;
+  margin:0 0 14px!important;
+  z-index:5!important;
+  transform:none!important;
+  box-shadow:0 5px 14px rgba(98,68,48,.13)!important;
+}
+#infoModal .info-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:9px;
+}
+#infoModal .info-tag{
+  display:inline-flex;
+  align-items:center;
+  max-width:100%;
+  padding:7px 10px;
+  border-radius:999px;
+  background:#f0e4da;
+  color:#725d50;
+  font-size:12px;
+  line-height:1.2;
+  overflow-wrap:anywhere;
+}
+#infoModal .info-tags-empty{color:#9a887c;font-size:13px;margin-top:7px;}
+body.night #infoModal .info-tag{background:#484044;color:#eadbd1;}
+body.night #infoModal .info-tags-empty{color:#b9aaa0;}
+</style>
+
+
 <style id="v42-danbooru-night">
 /* V42：Danbooru 夜色不再纯黑。外层背景比弹窗略亮，弹窗保持暖灰棕。 */
 body.night #danbooruModal{
@@ -3402,7 +3447,7 @@ onclick="closeImage()">
 ========================= -->
 
 <div id="infoModal" class="modal hidden">
-
+<div class="modal-box">
 
 <button 
 id="infoBack"
@@ -3411,9 +3456,6 @@ onclick="closeInfo()">
 ← 返回
 
 </button>
-
-
-<div class="modal-box">
 
 
 <h3 id="infoTitle">
@@ -4525,10 +4567,17 @@ async function renderCards(){
 
 
 
+let infoReturnScrollY=0;
+
 async function showInfo(index){
 
     const item = DB[currentLibrary][currentCategory][index];
     if(!item) return;
+
+    const infoModal=$("infoModal");
+    if(infoModal&&infoModal.classList.contains("hidden")){
+        infoReturnScrollY=window.scrollY||document.documentElement.scrollTop||0;
+    }
 
     let img="";
     if(item.images && item.images.length){
@@ -4536,10 +4585,22 @@ async function showInfo(index){
     }
     if(!img && item.remoteImage) img=item.remoteImage;
 
+    const tags=Array.isArray(item.tags)
+        ? item.tags.filter(Boolean)
+        : String(item.tags||"").trim().split(/\s+/).filter(Boolean);
+    const tagsHtml=tags.length
+        ? `<div class="info-tags">${tags.map(tag=>`<span class="info-tag">${escapeHTML(tag)}</span>`).join("")}</div>`
+        : `<div class="info-tags-empty">暂未添加标签</div>`;
+
     $("infoTitle").innerHTML=item.name || "未命名";
 
     $("infoContent").innerHTML=`
         ${img ? `<div class="info-main-image-wrap"><img class="info-main-image" src="${img}" alt=""></div>` : `<div class="info-main-image-wrap info-no-image">暂无预览图</div>`}
+
+        <div class="info-section">
+            <div class="info-label"><b>标签</b></div>
+            ${tagsHtml}
+        </div>
 
         <div class="info-section">
             <div class="info-label"><b>正面提示词</b></div>
@@ -4559,22 +4620,14 @@ async function showInfo(index){
         </div>
     `;
 
-    $("infoModal").classList.remove("hidden");
+    infoModal.classList.remove("hidden");
 }
 
 
 
 function closeInfo(){
-
-
-$("infoModal")
-.classList.add("hidden");
-
-
-
-renderCards();
-
-
+    $("infoModal").classList.add("hidden");
+    requestAnimationFrame(()=>window.scrollTo({top:infoReturnScrollY,left:0,behavior:"auto"}));
 }
 
 
