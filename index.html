@@ -3025,6 +3025,65 @@ body.night #danbooruModal input{
 }
 </style>
 
+<style id="v52-image-parse-status">
+#cardWall .artist-card{position:relative!important;}
+.image-parse-status{
+  position:absolute;
+  top:10px;
+  left:50%;
+  z-index:8;
+  padding:7px 12px;
+  border-radius:999px;
+  color:#fff;
+  font-size:12px;
+  font-weight:700;
+  line-height:1;
+  white-space:nowrap;
+  pointer-events:none;
+  transform:translateX(-50%);
+  box-shadow:0 5px 15px rgba(35,25,20,.22);
+  animation:imageParseStatusFade 4s ease forwards;
+}
+.image-parse-status.success{background:rgba(75,132,91,.94);}
+.image-parse-status.failed{background:rgba(169,82,73,.94);}
+@keyframes imageParseStatusFade{
+  0%,70%{opacity:1;transform:translateX(-50%) translateY(0);}
+  100%{opacity:0;transform:translateX(-50%) translateY(-8px);visibility:hidden;}
+}
+</style>
+
+<style id="v54-card-time-sort">
+.card-sort-bar{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:9px;
+  margin:2px 0 14px;
+  padding:0 2px;
+  color:#8a7466;
+  font-size:12px;
+}
+.card-sort-bar select{
+  width:auto;
+  max-width:78%;
+  margin:0;
+  padding:9px 34px 9px 12px;
+  border:1px solid rgba(185,139,103,.22);
+  border-radius:999px;
+  background:#f5ebe3;
+  color:#725c4f;
+  font-size:12px;
+  outline:none;
+}
+.card-sort-bar select:focus{border-color:#b98b67;box-shadow:0 0 0 3px rgba(185,139,103,.10);}
+body.night .card-sort-bar{color:#bca9a0;}
+body.night .card-sort-bar select{background:#3c3738;color:#eee3dc;border-color:#5c504c;}
+@media(max-width:520px){
+  .card-sort-bar{justify-content:space-between;margin-top:8px;}
+  .card-sort-bar select{max-width:82%;font-size:11px;padding-top:8px;padding-bottom:8px;}
+}
+</style>
+
 </head>
 
 
@@ -3245,6 +3304,14 @@ class="category-list">
 </div>
 
 
+</div>
+
+<div class="card-sort-bar">
+  <span>图片顺序</span>
+  <select id="cardSortSelect" onchange="setCardSortMode(this.value)">
+    <option value="default">默认顺序 · 新添加在下面</option>
+    <option value="newest">按时间排序 · 新添加在上面</option>
+  </select>
 </div>
 
 
@@ -3544,6 +3611,15 @@ placeholder="搜索Prompt/画师">
         <div class="update-log-content v27-date-log">
 <div class="v27-date-group">
   <button class="v27-date-head" type="button" onclick="toggleUpdateDate(this)">
+    <b>2026.9.19</b><em>点击查看</em>
+  </button>
+  <div class="v27-date-body">
+<div class="update-item"><span>01</span><div><b>PNG 解析状态提示</b><p>批量导入图片后，会在每张新图片上显示“解析成功”或“解析失败”，几秒后自动淡出。</p></div></div>
+<div class="update-item"><span>02</span><div><b>图片时间排序</b><p>新增默认顺序与按时间排序，可自由选择让新导入的图片显示在下面或最上面。</p></div></div>
+  </div>
+</div>
+<div class="v27-date-group">
+  <button class="v27-date-head" type="button" onclick="toggleUpdateDate(this)">
     <b>2026.9.18</b><em>点击查看</em>
   </button>
   <div class="v27-date-body">
@@ -3772,6 +3848,9 @@ recycleBin:[]
 let currentLibrary="";
 let currentCategory="";
 let editIndex=-1;
+
+const CARD_SORT_KEY="NAI_CARD_SORT_V54";
+let cardSortMode=localStorage.getItem(CARD_SORT_KEY)==="newest"?"newest":"default";
 
 let imageDB=null;
 
@@ -4350,6 +4429,9 @@ $("categoryTitle")
 "📁 "+name;
 
 
+updateCardSortUI();
+
+
 
 renderCards();
 
@@ -4373,6 +4455,17 @@ renderCards();
 // 默认只显示图片
 // ===============================
 
+function updateCardSortUI(){
+    const select=$("cardSortSelect");
+    if(select)select.value=cardSortMode;
+}
+
+function setCardSortMode(mode){
+    cardSortMode=mode==="newest"?"newest":"default";
+    localStorage.setItem(CARD_SORT_KEY,cardSortMode);
+    updateCardSortUI();
+    renderCards();
+}
 
 
 async function renderCards(){
@@ -4382,9 +4475,17 @@ async function renderCards(){
 
     box.innerHTML="";
 
-    let list =
+    let sourceList =
     DB[currentLibrary]
     [currentCategory];
+
+    let list=sourceList;
+    if(cardSortMode==="newest"){
+        list=sourceList
+        .map((item,index)=>({item,index}))
+        .sort((a,b)=>(Number(b.item.time)||0)-(Number(a.item.time)||0)||(a.index-b.index))
+        .map(entry=>entry.item);
+    }
 
 
     for(
@@ -4394,6 +4495,8 @@ async function renderCards(){
     ){
 
         let item=list[i];
+
+        let parseStatus=importParseStatus.get(item)||"";
 
         let src="";
 
@@ -4430,6 +4533,8 @@ async function renderCards(){
         :""
         }
 
+        ${parseStatus ? `<div class="image-parse-status ${parseStatus}">${parseStatus==="success"?"解析成功":"解析失败"}</div>` : ""}
+
         <div class="card-content">
 
         <button class="favorite-btn ${item.favorite ? "active" : ""}" title="${item.favorite ? "取消收藏" : "收藏"}">
@@ -4455,6 +4560,14 @@ async function renderCards(){
         </div>
         `;
 
+        if(parseStatus){
+            const statusBadge=div.querySelector(".image-parse-status");
+            setTimeout(()=>{
+                if(statusBadge)statusBadge.remove();
+                importParseStatus.delete(item);
+            },4200);
+        }
+
 
         /* =========================
            点击图片查看信息
@@ -4465,7 +4578,8 @@ async function renderCards(){
             div.querySelector(".preview-img")
             .onclick=function(){
 
-                showInfo(i);
+                const realIndex=sourceList.indexOf(item);
+                if(realIndex>=0)showInfo(realIndex);
 
             };
 
@@ -4497,7 +4611,8 @@ async function renderCards(){
         div.querySelector(".info-btn")
         .onclick=function(){
 
-            showInfo(i);
+            const realIndex=sourceList.indexOf(item);
+            if(realIndex>=0)showInfo(realIndex);
 
         };
 
@@ -4509,7 +4624,8 @@ async function renderCards(){
         div.querySelector(".edit-btn")
         .onclick=function(){
 
-            editCard(i);
+            const realIndex=sourceList.indexOf(item);
+            if(realIndex>=0)editCard(realIndex);
 
         };
 
@@ -4521,7 +4637,8 @@ async function renderCards(){
         div.querySelector(".delete-btn")
         .onclick=function(){
 
-            deleteCard(i);
+            const realIndex=sourceList.indexOf(item);
+            if(realIndex>=0)deleteCard(realIndex);
 
         };
 
@@ -4530,25 +4647,27 @@ async function renderCards(){
            长按拖动排序
         ========================= */
 
-        enableDragSort(
-            div,
-            box,
-            function(){
+        if(cardSortMode==="default"){
+            enableDragSort(
+                div,
+                box,
+                function(){
 
-                let newList=
-                Array.from(
-                    box.children
-                ).map(
-                    el=>el._artistItem
-                );
+                    let newList=
+                    Array.from(
+                        box.children
+                    ).map(
+                        el=>el._artistItem
+                    );
 
-                DB[currentLibrary]
-                [currentCategory]=newList;
+                    DB[currentLibrary]
+                    [currentCategory]=newList;
 
-                saveDB();
+                    saveDB();
 
-            }
-        );
+                }
+            );
+        }
 
 
         div._artistItem=item;
@@ -4676,6 +4795,15 @@ $("importModal")
 // PNG批量导入
 // ===============================
 
+const importParseStatus=new WeakMap();
+
+function hasParsedPNGMetadata(data){
+    if(!data)return false;
+    return [
+        data.prompt,data.negative,data.sampler,data.seed,
+        data.steps,data.cfg,data.model,data.vae
+    ].some(value=>String(value||"").trim().length>0);
+}
 
 
 $("pngInput")
@@ -4758,8 +4886,10 @@ progress.innerHTML=
 "导入完成";
 
 
-
-renderCards();
+await new Promise(r=>setTimeout(r,250));
+closeImport();
+await renderCards();
+this.value="";
 
 
 
@@ -4785,6 +4915,9 @@ async function importPNG(file){
 
 let data =
 await parsePNG(file);
+
+let parsed=
+hasParsedPNGMetadata(data);
 
 
 
@@ -4883,6 +5016,9 @@ Date.now()
 DB[currentLibrary]
 [currentCategory]
 .push(item);
+
+
+importParseStatus.set(item,parsed?"success":"failed");
 
 
 
