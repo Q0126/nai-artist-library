@@ -2933,6 +2933,37 @@ body.night .recycle-folder-real .folder-trash-icon{
 }
 </style>
 
+
+<style id="v42-danbooru-night">
+/* V42：Danbooru 夜色不再纯黑。外层背景比弹窗略亮，弹窗保持暖灰棕。 */
+body.night #danbooruModal{
+  background:rgba(76,69,67,.64)!important;
+  backdrop-filter:blur(7px) brightness(1.10)!important;
+  -webkit-backdrop-filter:blur(7px) brightness(1.10)!important;
+}
+body.night #danbooruModal .danbooru-box{
+  background:#302d2d!important;
+  border:1px solid rgba(255,238,224,.10)!important;
+  box-shadow:0 18px 48px rgba(20,16,15,.24)!important;
+}
+body.night #danbooruModal .danbooru-artist{
+  background:#383333!important;
+  border-color:rgba(225,199,180,.13)!important;
+}
+body.night #danbooruModal .danbooru-post{
+  background:#433b38!important;
+}
+body.night #danbooruModal .danbooru-post.image-failed::before{
+  background:#433b38!important;
+  color:#c8b7ab!important;
+}
+body.night #danbooruModal input{
+  background:#3b3635!important;
+  color:#eee5dd!important;
+  border-color:#554c48!important;
+}
+</style>
+
 </head>
 
 
@@ -6639,6 +6670,10 @@ async function searchDanbooruArtist(){
         box.innerHTML=`<div class="danbooru-empty">当前浏览器可能拦截了 Danbooru 接口。<br><br><button onclick="window.open('${danbooruPostsUrl(q)}','_blank')">直接打开 Danbooru 搜索</button></div>`;
     }
 }
+const DANBOORU_IMAGE_PROXY="https://nai-danbooru-proxy.173430357.workers.dev/?url=";
+function danbooruProxyUrl(url){
+    return DANBOORU_IMAGE_PROXY+encodeURIComponent(String(url||""));
+}
 function danbooruImageCandidates(p){
     const raw=[],out=[];
     const addRaw=u=>{
@@ -6649,40 +6684,46 @@ function danbooruImageCandidates(p){
         if(u.startsWith("/"))u="https://danbooru.donmai.us"+u;
         if(!raw.includes(u))raw.push(u);
     };
+
+    /* V42：优先使用 Danbooru API 真正返回的 media_asset 变体。
+       这些地址比手工拼 CDN 路径可靠，尤其适合新版 Danbooru。 */
+    const asset=p.media_asset||{};
+    const variants=Array.isArray(asset.variants)?asset.variants:[];
+    const preferred=["180x180","360x360","720x720","sample","original"];
+    preferred.forEach(type=>{
+        variants
+          .filter(v=>String(v.type||"").toLowerCase()===type)
+          .forEach(v=>addRaw(v.url||v.file_url));
+    });
+    variants.forEach(v=>addRaw(v.url||v.file_url));
+
+    /* 再尝试 posts API 自带的三个地址 */
     addRaw(p.preview_file_url);
     addRaw(p.large_file_url);
     addRaw(p.file_url);
 
-    const asset=p.media_asset||{};
-    const variants=Array.isArray(asset.variants)?asset.variants:[];
-    ["180x180","360x360","720x720","sample","original"].forEach(type=>{
-        variants.filter(v=>String(v.type||"").toLowerCase()===type)
-                .forEach(v=>addRaw(v.url||v.file_url));
-    });
-    variants.forEach(v=>addRaw(v.url||v.file_url));
-
+    /* 最后才用 md5 推导地址作为兜底 */
     const md5=String(p.md5||asset.md5||"");
     const ext=String(p.file_ext||asset.file_ext||"jpg").toLowerCase();
     if(md5.length>=4){
         const x=md5.slice(0,2),y=md5.slice(2,4);
-        addRaw(`https://cdn.donmai.us/preview/${x}/${y}/${md5}.jpg`);
-        addRaw(`https://cdn.donmai.us/sample/${x}/${y}/${md5}.jpg`);
+        addRaw(`https://cdn.donmai.us/180x180/${x}/${y}/${md5}.jpg`);
+        addRaw(`https://cdn.donmai.us/360x360/${x}/${y}/${md5}.jpg`);
+        addRaw(`https://cdn.donmai.us/sample/${x}/${y}/sample-${md5}.jpg`);
         addRaw(`https://cdn.donmai.us/original/${x}/${y}/${md5}.${ext}`);
     }
 
     const add=u=>{if(u&&!out.includes(u))out.push(u)};
     raw.forEach(u=>{
+        /* V45：手机浏览器已验证 Danbooru CDN 原图可直接打开。
+           不再先经过会被 Danbooru 返回 403 的 Cloudflare Worker。 */
         add(u);
-        /* Android 浏览器若直接拦截 donmai CDN，就自动转图片代理继续尝试 */
-        const noProtocol=u.replace(/^https?:\/\//i,"");
-        add("https://images.weserv.nl/?url="+encodeURIComponent(noProtocol)+"&w=500&output=jpg");
-        add("https://wsrv.nl/?url="+encodeURIComponent(u)+"&w=500&output=jpg");
     });
     return out;
 }
 function danbooruImageFallback(img){
  try{const q=JSON.parse(img.dataset.fallback||"[]");if(q.length){img.dataset.fallback=JSON.stringify(q.slice(1));img.src=q[0];return}}catch(e){}
- img.onerror=null;const box=img.parentElement;img.remove();if(box){box.classList.add("image-failed");const d=document.createElement("div");d.className="danbooru-image-placeholder";d.innerHTML="图片直连失败<br><small>正在尝试备用线路；仍失败可点开原作</small>";box.insertBefore(d,box.firstChild)}
+ img.onerror=null;const box=img.parentElement;img.remove();if(box){box.classList.add("image-failed");const d=document.createElement("div");d.className="danbooru-image-placeholder";d.innerHTML="图片暂时无法加载<br><small>仍可点击这里打开 Danbooru 原作</small>";box.insertBefore(d,box.firstChild)}
 }
 async function loadDanbooruPosts(a,target){
  const name=artistNameFromResult(a);if(!name)return;
@@ -6691,7 +6732,7 @@ async function loadDanbooruPosts(a,target){
   const url=new URL("https://danbooru.donmai.us/posts.json");url.searchParams.set("tags",name);url.searchParams.set("limit","6");
   const posts=await danbooruFetch(url.toString()),valid=(Array.isArray(posts)?posts:[]).filter(p=>p&&p.id);
   if(!valid.length){target.innerHTML='<div class="danbooru-preview-title">作品预览</div><div class="danbooru-empty">这个画师暂时没有可预览作品</div>';return}
-  const cards=valid.map(p=>{const link=`https://danbooru.donmai.us/posts/${p.id}`,s=danbooruImageCandidates(p);if(!s.length)return `<div class="danbooru-post image-failed" onclick="window.open('${link}','_blank')"><div class="danbooru-image-placeholder">图片地址不可用<br><small>点这里打开原作</small></div><small>#${escapeHtml(p.id)}</small></div>`;return `<div class="danbooru-post" onclick="window.open('${link}','_blank')"><img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${escapeHtml(s[0])}" data-fallback="${escapeHtml(JSON.stringify(s.slice(1)))}" onerror="danbooruImageFallback(this)"><small>#${escapeHtml(p.id)}</small></div>`}).join("");
+  const cards=valid.map(p=>{const link=`https://danbooru.donmai.us/posts/${p.id}`,s=danbooruImageCandidates(p);if(!s.length)return `<div class="danbooru-post image-failed" onclick="window.open('${link}','_blank')"><div class="danbooru-image-placeholder">图片地址不可用<br><small>点这里打开原作</small></div><small>#${escapeHtml(p.id)}</small></div>`;return `<div class="danbooru-post" onclick="window.open('${link}','_blank')"><img loading="lazy" decoding="async" src="${escapeHtml(s[0])}" data-fallback="${escapeHtml(JSON.stringify(s.slice(1)))}" onerror="danbooruImageFallback(this)"><small>#${escapeHtml(p.id)}</small></div>`}).join("");
   target.innerHTML='<div class="danbooru-preview-title">作品预览 · 点击图片打开原作</div><div class="danbooru-posts">'+cards+'</div>';
  }catch(e){console.warn("Danbooru preview failed",e);target.innerHTML='<div class="danbooru-preview-title">作品预览</div><div class="danbooru-empty">作品已经搜到，但当前浏览器没有成功读取 Danbooru 图片文件。<br>帖子编号仍可正常打开原作。</div>'}
 }
@@ -6714,9 +6755,22 @@ async function saveDanbooruArtist(a){
     try{
         const posts=await danbooruFetch("https://danbooru.donmai.us/posts.json?tags="+encodeURIComponent(name)+"&limit=1");
         const p=posts&&posts[0];
-        remoteImage=p&&(p.large_file_url||p.file_url||p.preview_file_url)||"";
+        const imageCandidates=p?danbooruImageCandidates(p):[];
+        remoteImage=imageCandidates[0]||"";
         if(remoteImage){
-            try{const r=await fetch(remoteImage,{mode:"cors"});if(r.ok){const blob=await r.blob();const id=await saveImageBlob(blob);if(id){DB[lib][cat].push({name:name,danbooruName:name,aliases:aliases,images:[id],remoteImage:remoteImage,prompt:name,negative:"",note:"Danbooru 画师\n"+danbooruUrl(name),danbooruUrl:danbooruUrl(name),time:Date.now()});saveDB();alert(`已保存到「单画师 / ${cat}」✨`);closeDanbooruSearch();return;}}}catch(e){console.warn("保存远程图片失败",e);}
+            try{
+                for(const imageUrl of imageCandidates){
+                    try{
+                        const r=await fetch(imageUrl,{cache:"no-store",mode:"cors",credentials:"omit"});
+                        if(!r.ok)continue;
+                        const blob=await r.blob();
+                        if(blob && blob.size && (!blob.type || blob.type.startsWith("image/"))){
+                            const id=await saveImageBlob(blob);
+                            if(id){DB[lib][cat].push({name:name,danbooruName:name,aliases:aliases,images:[id],remoteImage:imageUrl,prompt:name,negative:"",note:"Danbooru 画师\n"+danbooruUrl(name),danbooruUrl:danbooruUrl(name),time:Date.now()});saveDB();alert(`已保存到「单画师 / ${cat}」✨`);closeDanbooruSearch();return;}
+                        }
+                    }catch(e){console.warn("直接保存 Danbooru 图片失败，尝试下一地址",e);}
+                    }
+            }catch(e){console.warn("保存 Danbooru 远程图片失败",e);}
         }
     }catch(e){console.warn("读取画师作品失败",e);}
     DB[lib][cat].push({name:name,danbooruName:name,aliases:aliases,images:[],remoteImage:remoteImage,prompt:name,negative:"",note:"Danbooru 画师\n"+danbooruUrl(name),danbooruUrl:danbooruUrl(name),time:Date.now()});
