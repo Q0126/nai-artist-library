@@ -3790,7 +3790,7 @@ placeholder="搜索Prompt/画师">
         <div class="update-log-head">
             <div>
                 <div class="update-log-title">更新日志</div>
-                <div class="update-log-version">v58 · 按日期查看更新内容</div>
+                <div class="update-log-version">v59 · 按日期查看更新内容</div>
             </div>
             <button class="update-log-x" onclick="closeUpdateLog()" aria-label="关闭">×</button>
         </div>
@@ -3809,6 +3809,7 @@ placeholder="搜索Prompt/画师">
 <div class="update-item"><span>07</span><div><b>长提示词独立滚动</b><p>正面与负面提示词改为独立滚动框，并可一键展开全部或重新收起，复制按钮无需滑到整段末尾。</p></div></div>
 <div class="update-item"><span>08</span><div><b>随机抽取画师资料</b><p>新增摇签抽取入口，可选择“画师串”或“单画师”。抽取结果显示预览图、名称与所属文件夹，并提供复制正面、复制负面、复制全部、查看资料、再抽一次和返回。</p></div></div>
 <div class="update-item"><span>09</span><div><b>D站搜索输入联想</b><p>在 Danbooru 搜索框输入字符时会直接出现关联画师、别名与作品数；点击某个建议即可搜索，点击搜索按钮后联想列表会关闭。</p></div></div>
+<div class="update-item"><span>10</span><div><b>NovelAI 官方 PNG 解析修复</b><p>修复从 NovelAI 官网保存的 PNG 导入后，把 Title、Software、Comment 等元数据混入正面提示词，以及正面和负面提示词错位的问题。现在会准确读取官方 JSON 中的 prompt 与 uc。</p></div></div>
   </div>
 </div>
 <div class="v27-date-group">
@@ -5473,6 +5474,30 @@ file.slice(
 // ===============================
 // NAI参数解析
 // ===============================
+/* NovelAI PNG 的元数据常见格式是 Title...Comment{"prompt":...}，
+   不能把第一个 { 到文本末尾全部当作 JSON。 */
+function extractNAIJson(text){
+    const source=String(text||"");
+    const starts=[source.indexOf('{"prompt"'),source.indexOf('{"uc"'),source.indexOf('{"v4_prompt"')].filter(n=>n>=0).sort((a,b)=>a-b);
+    for(const start of starts){
+        let depth=0,inString=false,escaped=false;
+        for(let i=start;i<source.length;i++){
+            const ch=source[i];
+            if(inString){
+                if(escaped)escaped=false;
+                else if(ch==='\\')escaped=true;
+                else if(ch==='"')inString=false;
+                continue;
+            }
+            if(ch==='"'){inString=true;continue;}
+            if(ch==='{')depth++;
+            else if(ch==='}' && --depth===0){
+                try{return JSON.parse(source.slice(start,i+1));}catch(e){break;}
+            }
+        }
+    }
+    return null;
+}
 
 
 function decodeNAI(text){
@@ -5516,35 +5541,26 @@ try{
 
 
 
-let start =
-text.indexOf("{");
+let obj = extractNAIJson(text);
 
 
 
 if(
-start>=0
+obj
 ){
 
 
 
-let obj =
-JSON.parse(
-text.substring(start)
-);
+/* JSON 已由 extractNAIJson 提取 */
 
 
 
 
-data.prompt =
-obj.prompt ||
-"";
+data.prompt = obj.prompt || obj.v4_prompt?.caption?.base_caption || "";
 
 
 
-data.negative =
-obj.uc ||
-obj.negative ||
-"";
+data.negative = obj.uc || obj.negative || obj.v4_negative_prompt?.caption?.base_caption || "";
 
 
 
@@ -5574,9 +5590,7 @@ obj.cfg ||
 
 
 
-data.model =
-obj.model ||
-"";
+data.model = obj.model || obj.model_name || "";
 
 
 
@@ -5604,12 +5618,8 @@ return data;
 
 }
 
-
-
 }
 catch(e){}
-
-
 
 let lines =
 text.split("\n");
@@ -5695,6 +5705,24 @@ return data;
 
 
 
+}
+
+function repairStoredNAIPrompts(){
+    let changed=false;
+    ["artistThread","singleArtist"].forEach(lib=>{
+        Object.values(DB[lib]||{}).forEach(list=>{
+            (Array.isArray(list)?list:[]).forEach(item=>{
+                if(!item||!item.raw)return;
+                const obj=extractNAIJson(item.raw);
+                if(!obj)return;
+                const prompt=obj.prompt||obj.v4_prompt?.caption?.base_caption||"";
+                const negative=obj.uc||obj.negative||obj.v4_negative_prompt?.caption?.base_caption||"";
+                if(prompt && item.prompt!==prompt){item.prompt=prompt;changed=true;}
+                if(negative && item.negative!==negative){item.negative=negative;changed=true;}
+            });
+        });
+    });
+    if(changed)saveDB();
 }
 
 
@@ -6763,6 +6791,8 @@ async function start(){
 
 
 await initImageDB();
+
+repairStoredNAIPrompts();
 
 
 
