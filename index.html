@@ -923,6 +923,27 @@ letter-spacing:1px;
 
 </style>
 
+<style id="v57-random-and-danbooru-suggest">
+/* V57：随机抽画师 + Danbooru 关联画师建议 */
+.home-random{display:flex;align-items:center;gap:11px;width:100%;margin-top:10px;padding:14px 16px;border:1px solid rgba(185,139,103,.18);border-radius:20px;background:linear-gradient(135deg,#f8eee6,#f3e3d6);color:#684f40;text-align:left;box-shadow:0 7px 18px rgba(100,70,50,.08);}
+.home-random>span:nth-child(2){display:flex;flex-direction:column;min-width:0;flex:1}.home-random b{font-size:15px}.home-random small{margin-top:3px;color:#9b8475;font-size:10px}.home-random i{font-style:normal;font-size:24px;color:#b38b6d}
+body.night .home-random{background:linear-gradient(135deg,#40383a,#332e31);color:#f1e6de;border-color:#5e514d}.night .home-random small{color:#bba9a0}.night .home-random i{color:#d4a47f}
+.random-box{width:min(520px,94vw);max-height:min(82vh,720px);overflow:auto;padding:22px;border-radius:26px;background:#fffaf6;box-shadow:0 18px 60px rgba(40,25,18,.24)}
+.random-head{display:flex;align-items:center;justify-content:space-between}.random-head h3{margin:0;color:#604c40}.random-sub{margin-top:5px;color:#a48e80;font-size:12px}.random-choice{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}.random-choice button,.random-result-actions button{margin:0;padding:14px 12px;border:0;border-radius:16px;background:#bd8f6b;color:#fff;font:inherit;box-shadow:0 5px 14px rgba(120,75,45,.15)}.random-choice button small{display:block;margin-top:4px;font-size:10px;opacity:.8}.random-result{margin-top:20px;padding:22px 16px;border-radius:22px;background:#f7eee7;text-align:center}.random-result-kind{color:#a18777;font-size:12px}.random-result-name{margin:8px 0 4px;color:#554239;font-size:25px;font-weight:700;word-break:break-word}.random-result-folder{color:#9b877a;font-size:12px}.random-result-actions{display:flex;gap:9px;margin-top:18px}.random-result-actions button{flex:1}.random-result-actions .secondary{background:#ead9ca;color:#684f40}.night .random-box{background:#2b292c}.night .random-head h3,.night .random-result-name{color:#f0e5de}.night .random-sub,.night .random-result-kind,.night .random-result-folder{color:#b9aaa1}.night .random-result{background:#3a3435}.night .random-result-actions .secondary{background:#4a3f3e;color:#f0e4dc}
+.random-result-image{display:block;width:min(100%,260px);max-height:220px;object-fit:contain;margin:14px auto 8px;border-radius:15px;background:#eee3da;box-shadow:0 5px 16px rgba(80,50,35,.12)}.random-copy-actions{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:14px}.random-copy-actions button{margin:0!important;padding:9px 11px;border:1px solid rgba(185,139,103,.22);border-radius:12px;background:#fff8f2;color:#785b49;font:inherit;font-size:12px}.night .random-result-image{background:#4a4140}.night .random-copy-actions button{background:#403839;color:#eedfd6;border-color:#64534c}
+body.night #randomArtistModal{background:rgba(14,13,15,.76)!important;backdrop-filter:blur(5px)}
+body.night #randomArtistModal .random-box{background:#302c2f!important;border:1px solid #51474a;box-shadow:0 22px 70px rgba(0,0,0,.48)}
+body.night #randomArtistModal .random-result{background:#3b3538!important;border:1px solid #55494a}
+body.night #randomArtistModal .random-choice button{background:#806554!important;color:#fff4ec!important;border:1px solid #9a7863!important}
+body.night #randomArtistModal .random-result-actions button{background:#8a6752!important;color:#fff4ec!important}
+body.night #randomArtistModal .random-result-actions .secondary{background:#4b4245!important;color:#eaded7!important;border:1px solid #65575a!important}
+body.night #randomArtistModal .update-log-x{background:#5b4740!important;color:#f5e8e0!important}
+.random-no-image{display:flex;align-items:center;justify-content:center;width:min(100%,260px);height:126px;margin:14px auto 8px;border:1px dashed rgba(185,139,103,.32);border-radius:15px;color:#9d887a;font-size:12px;background:rgba(255,255,255,.28)}
+body.night .random-no-image{background:#373235;color:#bca9a0;border-color:#5e5052}
+.danbooru-search-wrap{position:relative}.danbooru-suggest{position:absolute;z-index:20;left:0;right:86px;top:calc(100% + 5px);max-height:220px;overflow:auto;border:1px solid rgba(185,139,103,.24);border-radius:14px;background:#fffaf6;box-shadow:0 12px 28px rgba(55,35,25,.18)}.danbooru-suggest.hidden{display:none}.danbooru-suggest-item{display:flex;align-items:baseline;gap:7px;padding:10px 12px;border-bottom:1px solid rgba(185,139,103,.10);cursor:pointer}.danbooru-suggest-item:last-child{border-bottom:0}.danbooru-suggest-item:hover{background:#f5e9df}.danbooru-suggest-name{font-weight:600;color:#604b3e}.danbooru-suggest-meta{color:#a29085;font-size:11px}.night .danbooru-suggest{background:#322f31;border-color:#5a4e4b}.night .danbooru-suggest-item:hover{background:#453b3a}.night .danbooru-suggest-name{color:#f0e5de}.night .danbooru-suggest-meta{color:#b9aaa0}
+@media(max-width:520px){.random-choice{grid-template-columns:1fr}.random-result-actions{flex-direction:column}.danbooru-suggest{right:0;top:calc(100% + 4px)}}
+</style>
+
 <style id="search-fix-v11">
 /* v11 搜索：固定为真正的两列独立卡片，禁止内容互相挤压 */
 #searchModal .modal-box{
@@ -3293,6 +3314,12 @@ body.night .danbooru-post-count{color:#aaa09a;}
     <i>›</i>
   </button>
 
+  <button class="home-random" onclick="openRandomArtist()">
+    <span aria-hidden="true">🎋</span>
+    <span><b>随机抽画师</b><small>像摇签一样，从画师串或单画师中抽一位</small></span>
+    <i>›</i>
+  </button>
+
   <div class="home-tools">
     <button onclick="exportData()"><span>📦</span><b>导出</b><small>备份资料</small></button>
     <button onclick="importBackup()"><span>📥</span><b>导入</b><small>恢复资料</small></button>
@@ -3724,6 +3751,20 @@ placeholder="搜索Prompt/画师">
 
 
 <!-- Danbooru 画师搜索 -->
+<div id="randomArtistModal" class="modal hidden">
+  <div class="random-box">
+    <div class="random-head">
+      <div><h3>🎋 摇签抽画师</h3><div class="random-sub">心念一动，看看今天会遇见谁</div></div>
+      <button class="update-log-x" onclick="closeRandomArtist()" aria-label="关闭">×</button>
+    </div>
+    <div id="randomChoice" class="random-choice">
+      <button onclick="drawRandomArtist('artistThread')">抽画师串<small>从画师串资料库随机抽取</small></button>
+      <button onclick="drawRandomArtist('singleArtist')">抽单画师<small>从单画师资料库随机抽取</small></button>
+    </div>
+    <div id="randomResult" class="random-result hidden"></div>
+  </div>
+</div>
+
 <div id="danbooruModal" class="modal hidden">
   <div class="modal-box danbooru-box">
     <div class="danbooru-head">
@@ -3733,9 +3774,10 @@ placeholder="搜索Prompt/画师">
       </div>
       <button class="update-log-x" onclick="closeDanbooruSearch()">×</button>
     </div>
-    <div class="danbooru-search-row">
+    <div class="danbooru-search-row danbooru-search-wrap">
       <input id="danbooruInput" placeholder="输入画师名，例如 redjuice" autocomplete="off">
       <button onclick="searchDanbooruArtist()">搜索</button>
+      <div id="danbooruSuggest" class="danbooru-suggest hidden"></div>
     </div>
     <div id="danbooruStatus" class="danbooru-status">输入画师名后搜索</div>
     <div id="danbooruResult"></div>
@@ -3748,7 +3790,7 @@ placeholder="搜索Prompt/画师">
         <div class="update-log-head">
             <div>
                 <div class="update-log-title">更新日志</div>
-                <div class="update-log-version">按日期查看更新内容</div>
+                <div class="update-log-version">v58 · 按日期查看更新内容</div>
             </div>
             <button class="update-log-x" onclick="closeUpdateLog()" aria-label="关闭">×</button>
         </div>
@@ -3765,6 +3807,8 @@ placeholder="搜索Prompt/画师">
 <div class="update-item"><span>05</span><div><b>文件夹快速搜索</b><p>文件夹页面新增名称搜索，文件夹较多时也能快速定位。</p></div></div>
 <div class="update-item"><span>06</span><div><b>图片跨文件夹移动</b><p>在图片提示词详情中可以将当前资料移动到同一资料库的其他文件夹，误导入后无需删除重来。</p></div></div>
 <div class="update-item"><span>07</span><div><b>长提示词独立滚动</b><p>正面与负面提示词改为独立滚动框，并可一键展开全部或重新收起，复制按钮无需滑到整段末尾。</p></div></div>
+<div class="update-item"><span>08</span><div><b>随机抽取画师资料</b><p>新增摇签抽取入口，可选择“画师串”或“单画师”。抽取结果显示预览图、名称与所属文件夹，并提供复制正面、复制负面、复制全部、查看资料、再抽一次和返回。</p></div></div>
+<div class="update-item"><span>09</span><div><b>D站搜索输入联想</b><p>在 Danbooru 搜索框输入字符时会直接出现关联画师、别名与作品数；点击某个建议即可搜索，点击搜索按钮后联想列表会关闭。</p></div></div>
   </div>
 </div>
 <div class="v27-date-group">
@@ -6992,11 +7036,122 @@ function saveHomePhotoCaption(value){
 // 先按 Danbooru 的 artist 搜索参数取候选，再在前端做严格匹配。
 // 这样即使接口返回无关结果，也不会把它们当成搜索结果显示。
 // ===============================
+let randomArtistState=null;
+function openRandomArtist(){
+    const modal=$("randomArtistModal"),choice=$("randomChoice"),result=$("randomResult");
+    randomArtistState=null;
+    choice.classList.remove("hidden");
+    result.classList.add("hidden");
+    result.innerHTML="";
+    modal.classList.remove("hidden");
+}
+function closeRandomArtist(){ $("randomArtistModal").classList.add("hidden"); }
+function getRandomArtistPool(library){
+    const groups=DB[library]||{};
+    const pool=[];
+    Object.keys(groups).forEach(category=>{
+        const list=Array.isArray(groups[category])?groups[category]:[];
+        list.forEach((item,index)=>pool.push({library,category,index,item}));
+    });
+    return pool;
+}
+async function getRandomArtistImage(item){
+    if(item&&item.images&&item.images.length){
+        try{ const src=await getImage(item.images[0]); if(src)return src; }catch(e){}
+    }
+    return item&&item.remoteImage ? item.remoteImage : "";
+}
+function copyRandomPrompt(kind){
+    const item=randomArtistState&&randomArtistState.item;
+    if(!item)return;
+    const positive=String(item.prompt||"").trim();
+    const negative=String(item.negative||"").trim();
+    const text=kind==="positive"?positive:kind==="negative"?negative:[positive?"正面提示词：\n"+positive:"",negative?"负面提示词：\n"+negative:""].filter(Boolean).join("\n\n");
+    copyToClipboard(text);
+    alert(kind==="positive"?"正面提示词已复制":kind==="negative"?"负面提示词已复制":"全部提示词已复制");
+}
+async function drawRandomArtist(library){
+    const pool=getRandomArtistPool(library);
+    const result=$("randomResult");
+    $("randomChoice").classList.add("hidden");
+    result.classList.remove("hidden");
+    if(!pool.length){
+        randomArtistState=null;
+        result.innerHTML=`<div class="random-result-kind">签筒还是空的</div><div class="random-result-name">还没有可抽取的资料</div><div class="random-result-folder">先向${library==="artistThread"?"画师串":"单画师"}资料库添加内容吧</div><div class="random-result-actions"><button class="secondary" onclick="backRandomChoice()">← 返回选择</button></div>`;
+        return;
+    }
+    let picked=pool[Math.floor(Math.random()*pool.length)];
+    if(pool.length>1 && randomArtistState && randomArtistState.library===library){
+        for(let i=0;i<5 && picked.category===randomArtistState.category && picked.index===randomArtistState.index;i++)picked=pool[Math.floor(Math.random()*pool.length)];
+    }
+    randomArtistState=picked;
+    const label=library==="artistThread"?"画师串":"单画师";
+    result.innerHTML=`<div class="random-result-kind">${label} · 今日一签</div><div class="random-result-name">${escapeHtml(picked.item.name||"未命名")}</div><div class="random-result-folder">来自文件夹「${escapeHtml(picked.category)}」</div><div class="random-result-loading">正在读取预览图…</div>`;
+    const image=await getRandomArtistImage(picked.item);
+    if(randomArtistState!==picked)return;
+    result.innerHTML=`<div class="random-result-kind">${label} · 今日一签</div>${image?`<img class="random-result-image" src="${image}" alt="${escapeHtml(picked.item.name||"随机画师")}">`:`<div class="random-no-image">这条资料暂时没有预览图</div>`}<div class="random-result-name">${escapeHtml(picked.item.name||"未命名")}</div><div class="random-result-folder">来自文件夹「${escapeHtml(picked.category)}」</div><div class="random-copy-actions"><button onclick="copyRandomPrompt('positive')">复制正面</button><button onclick="copyRandomPrompt('negative')">复制负面</button><button onclick="copyRandomPrompt('all')">复制全部</button></div><div class="random-result-actions"><button onclick="jumpToRandomArtist()">查看资料</button><button class="secondary" onclick="drawRandomArtist('${library}')">再抽一次</button><button class="secondary" onclick="backRandomChoice()">← 返回</button></div>`;
+}
+function backRandomChoice(){
+    randomArtistState=null;
+    $("randomResult").classList.add("hidden");
+    $("randomChoice").classList.remove("hidden");
+}
+function jumpToRandomArtist(){
+    const picked=randomArtistState;
+    if(!picked)return;
+    closeRandomArtist();
+    currentLibrary=picked.library;
+    currentCategory=picked.category;
+    $("homePage").classList.add("hidden");
+    $("libraryPage").classList.add("hidden");
+    $("categoryPage").classList.remove("hidden");
+    $("libraryTitle").innerHTML=picked.library==="artistThread"?"🎨 画师串":"🖌 单画师";
+    $("categoryTitle").innerHTML="📁 "+escapeHTML(picked.category);
+    updateCardSortUI();
+    renderCards().then(()=>showInfo(picked.index));
+}
+
+let danbooruSuggestTimer=0;
+let danbooruSuggestToken=0;
+function hideDanbooruSuggestions(){
+    const box=$("danbooruSuggest");
+    if(box){box.classList.add("hidden");box.innerHTML="";}
+}
+function scheduleDanbooruSuggestions(){
+    clearTimeout(danbooruSuggestTimer);
+    const q=$("danbooruInput").value.trim();
+    if(q.length<1){hideDanbooruSuggestions();return;}
+    const box=$("danbooruSuggest");
+    box.innerHTML=`<div class="danbooru-suggest-item"><span class="danbooru-suggest-meta">正在查找关联画师…</span></div>`;
+    box.classList.remove("hidden");
+    danbooruSuggestTimer=setTimeout(()=>loadDanbooruSuggestions(q),220);
+}
+async function loadDanbooruSuggestions(q){
+    const token=++danbooruSuggestToken;
+    const box=$("danbooruSuggest");
+    try{
+        const artists=await getDanbooruArtists(q);
+        if(token!==danbooruSuggestToken || $("danbooruInput").value.trim()!==q)return;
+        if(!artists.length){hideDanbooruSuggestions();return;}
+        box.innerHTML=artists.slice(0,8).map((a,i)=>{
+            const name=artistNameFromResult(a),aliases=artistAliases(a);
+            const meta=[a.post_count!=null?Number(a.post_count).toLocaleString()+" 个作品":"",aliases.length?aliases.slice(0,2).join("、"):""].filter(Boolean).join(" · ");
+            return `<div class="danbooru-suggest-item" data-suggest-index="${i}"><span class="danbooru-suggest-name">${escapeHtml(name)}</span><span class="danbooru-suggest-meta">${escapeHtml(meta)}</span></div>`;
+        }).join("");
+        box.classList.remove("hidden");
+        box.querySelectorAll("[data-suggest-index]").forEach((row,i)=>row.onclick=()=>{
+            $("danbooruInput").value=artistNameFromResult(artists[i]);
+            hideDanbooruSuggestions();
+            searchDanbooruArtist();
+        });
+    }catch(e){hideDanbooruSuggestions();}
+}
+
 function openDanbooruSearch(){
     $("danbooruModal").classList.remove("hidden");
     setTimeout(()=>$("danbooruInput").focus(),50);
 }
-function closeDanbooruSearch(){ $("danbooruModal").classList.add("hidden"); }
+function closeDanbooruSearch(){ hideDanbooruSuggestions(); $("danbooruModal").classList.add("hidden"); }
 function escapeHtml(s){
     return String(s??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
 }
@@ -7142,6 +7297,7 @@ function loadDanbooruPostCounts(artists,box){
     });
 }
 async function searchDanbooruArtist(){
+    hideDanbooruSuggestions();
     const q=$("danbooruInput").value.trim();
     const status=$("danbooruStatus"), box=$("danbooruResult");
     if(!q){ status.textContent="先输入一个画师名哦。"; box.innerHTML=""; return; }
@@ -8048,6 +8204,14 @@ document.addEventListener("DOMContentLoaded",function(){
     if(captionInput){
         captionInput.value=localStorage.getItem("NAI_home_photo_caption_v1")||"";
         captionInput.addEventListener("input",()=>saveHomePhotoCaption(captionInput.value));
+    }
+    const danbooruInput=$("danbooruInput");
+    if(danbooruInput){
+        danbooruInput.addEventListener("input",scheduleDanbooruSuggestions);
+        danbooruInput.addEventListener("keydown",e=>{
+            if(e.key==="Enter"){hideDanbooruSuggestions();searchDanbooruArtist();}
+            if(e.key==="Escape")hideDanbooruSuggestions();
+        });
     }
 });
 </script>
